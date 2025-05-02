@@ -63,7 +63,7 @@ pub fn calculate_macd(
         } else {
             // For positions where signal should have valid values
             let val = signal_ca.get(i).unwrap_or(0.0);
-            if val.is_nan() && macd_ca.get(i).map_or(false, |v| !v.is_nan()) {
+            if val.is_nan() && macd_ca.get(i).is_some_and(|v| !v.is_nan()) {
                 signal_vec.push(0.0);
             } else {
                 signal_vec.push(val);
