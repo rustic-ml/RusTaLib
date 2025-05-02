@@ -9,7 +9,7 @@ repository = "https://github.com/rustic-ml/technical-indicators"
 documentation = "https://docs.rs/technical-indicators"
 readme = "README.md"
 keywords = ["finance", "technical-analysis", "trading", "indicators", "stocks"]
-categories = ["finance", "mathematics", "stock-market", "ohlcv", "time-series", "technical-indicators"]
+categories = ["stock-market", "ohlcv", "time-series", "technical-indicators"]
 
 [dependencies]
 polars = { version = "0.46.0", features = ["lazy", "strings", "temporal", "rolling_window"] }
