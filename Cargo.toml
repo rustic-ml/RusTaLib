@@ -1,12 +1,12 @@
 [package]
-name = "technical-indicators"
+name = "ta-lib-in-rust"
 version = "1.0.1"
 edition = "2021"
 description = "A library of technical indicators for financial analysis"
 authors = ["Celsis Durham <durhamcelsis@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/rustic-ml/technical-indicators"
-documentation = "https://docs.rs/technical-indicators"
+documentation = "https://docs.rs/ta-lib-in-rust"
 readme = "README.md"
 keywords = ["finance", "technical-analysis", "trading", "indicators", "stocks"]
 categories = ["stock-market", "ohlcv", "time-series", "technical-indicators"]
