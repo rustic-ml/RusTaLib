@@ -83,4 +83,123 @@ pub fn calculate_wma(df: &DataFrame, column: &str, window: usize) -> PolarsResul
         weights: Some(weights),
         fn_params: None,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Helper function to create test DataFrame
+    fn create_test_df() -> DataFrame {
+        let price_data = Series::new("price".into(), &[10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0]);
+        DataFrame::new(vec![price_data.into()]).unwrap()
+    }
+
+    #[test]
+    fn test_calculate_sma_basic() {
+        let df = create_test_df();
+        let window = 3;
+        
+        let result = calculate_sma(&df, "price", window).unwrap();
+        let result_ca = result.f64().unwrap();
+        
+        // First two values should be null or NaN
+        for i in 0..(window-1) {
+            let val = result_ca.get(i);
+            assert!(val.is_none() || val.map_or(false, |v| v.is_nan()));
+        }
+        
+        // Manual calculation: (10 + 11 + 12) / 3 = 11.0
+        assert!((result_ca.get(2).unwrap() - 11.0).abs() < 1e-10);
+        
+        // Manual calculation: (11 + 12 + 13) / 3 = 12.0
+        assert!((result_ca.get(3).unwrap() - 12.0).abs() < 1e-10);
+        
+        // Manual calculation: (12 + 13 + 14) / 3 = 13.0
+        assert!((result_ca.get(4).unwrap() - 13.0).abs() < 1e-10);
+    }
+    
+    #[test]
+    fn test_calculate_sma_window_edge_case() {
+        let df = create_test_df();
+        
+        // Test with window size 1 (should return the same series)
+        let result = calculate_sma(&df, "price", 1).unwrap();
+        let result_ca = result.f64().unwrap();
+        
+        for i in 0..df.height() {
+            let price_val = df.column("price").unwrap().f64().unwrap().get(i).unwrap();
+            assert!((result_ca.get(i).unwrap() - price_val).abs() < 1e-10);
+        }
+        
+        // Test with window size equal to dataframe length
+        let window = df.height();
+        let result = calculate_sma(&df, "price", window).unwrap();
+        let result_ca = result.f64().unwrap();
+        
+        // Only the last value should be non-NaN
+        for i in 0..(window-1) {
+            let val = result_ca.get(i);
+            assert!(val.is_none() || val.map_or(false, |v| v.is_nan()));
+        }
+        
+        // Last value should be the mean of all values
+        let price_ca = df.column("price").unwrap().f64().unwrap();
+        let expected_mean = price_ca.iter()
+            .map(|opt_v| opt_v.unwrap())
+            .sum::<f64>() / (df.height() as f64);
+        assert!((result_ca.get(window-1).unwrap() - expected_mean).abs() < 1e-10);
+    }
+    
+    #[test]
+    fn test_calculate_ema_basic() {
+        let df = create_test_df();
+        let window = 3;
+        
+        let result = calculate_ema(&df, "price", window).unwrap();
+        let result_ca = result.f64().unwrap();
+        
+        // First two values should be null or NaN
+        for i in 0..(window-1) {
+            let val = result_ca.get(i);
+            assert!(val.is_none() || val.map_or(false, |v| v.is_nan()));
+        }
+        
+        // Check that some value exists for remaining positions (and is not NaN)
+        for i in window-1..df.height() {
+            let val = result_ca.get(i);
+            assert!(val.is_some());
+            assert!(!val.unwrap().is_nan());
+        }
+    }
+    
+    #[test]
+    fn test_calculate_wma_basic() {
+        let df = create_test_df();
+        let window = 3;
+        
+        let result = calculate_wma(&df, "price", window).unwrap();
+        let result_ca = result.f64().unwrap();
+        
+        // First two values should be null or NaN
+        for i in 0..(window-1) {
+            let val = result_ca.get(i);
+            assert!(val.is_none() || val.map_or(false, |v| v.is_nan()));
+        }
+        
+        // Manual calculation: (10*1 + 11*2 + 12*3) / (1+2+3) = 67/6 = 11.1666...
+        let expected = (10.0*1.0 + 11.0*2.0 + 12.0*3.0) / 6.0;
+        assert!((result_ca.get(2).unwrap() - expected).abs() < 1e-10);
+    }
+    
+    #[test]
+    #[should_panic(expected = "Not enough data points")]
+    fn test_insufficient_data() {
+        let price_data = Series::new("price".into(), &[10.0, 11.0]);
+        let df = DataFrame::new(vec![price_data.into()]).unwrap();
+        let window = 3;
+        
+        // This should panic with "Not enough data points"
+        let _ = calculate_sma(&df, "price", window).unwrap();
+    }
 } 
