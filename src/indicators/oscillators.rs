@@ -104,9 +104,16 @@ pub fn calculate_macd(
     
     let macd = (&ema_fast - &ema_slow)?;
     
-    // Create a temporary DataFrame for signal line calculation
-    let signal_df = DataFrame::new(vec![macd.clone().into_column()])?;
-    let signal = calculate_ema(&signal_df, "column_0", signal_period)?;
+    // Instead of creating a temporary DataFrame, apply EMA calculation directly to the macd series
+    // This avoids creating a temporary DataFrame
+    let macd_series = macd.clone();
+    let signal = macd_series.rolling_mean(RollingOptionsFixedWindow {
+        window_size: signal_period,
+        min_periods: signal_period,
+        center: false,
+        weights: None,
+        fn_params: None,
+    })?;
     
     Ok((macd.with_name("macd".into()), signal.with_name("macd_signal".into())))
 } 
