@@ -1,0 +1,13 @@
+[package]
+name = "technical-indicators"
+version = "0.1.0"
+edition = "2021"
+description = "A library of technical indicators for financial analysis"
+authors = ["Your Name <your.email@example.com>"]
+
+[dependencies]
+polars = { version = "0.46.0", features = ["lazy", "strings", "temporal", "rolling_window"] }
+chrono = "0.4.34"
+thiserror = "2.0.11"
+ndarray = "0.16.1"
+serde = { version = "1.0", features = ["derive"] }
