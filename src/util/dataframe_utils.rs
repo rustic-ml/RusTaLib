@@ -46,7 +46,7 @@ pub fn check_window_size(df: &DataFrame, window: usize, indicator_name: &str) ->
         ));
     }
     Ok(())
-}
+} 
 
 #[cfg(test)]
 mod tests {
