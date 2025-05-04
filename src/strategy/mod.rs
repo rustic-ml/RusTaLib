@@ -69,3 +69,4 @@ pub use minute::multi_indicator_minute_1 as minute_1;
 pub use minute::multi_indicator_minute_2 as minute_2;
 pub use minute::multi_indicator_minute_3 as minute_3;
 pub use minute::multi_indicator_minute_4 as minute_4;
+pub use minute::enhanced_minute_strategy as enhanced_minute;

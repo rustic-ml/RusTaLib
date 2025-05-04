@@ -1,34 +1,73 @@
 // Volume indicators module
 
-pub mod cmf;
-pub mod obv;
+use polars::prelude::*;
 
-// Re-export indicators
-pub use cmf::*;
-pub use obv::*;
+// Modules for volume indicators
+mod obv;
+mod cmf;
+mod mfi;
+
+// Re-export volume indicators
+pub use obv::calculate_obv;
+pub use cmf::calculate_cmf;
+pub use mfi::calculate_mfi;
+
+/// Add volume-based indicators to a DataFrame
+///
+/// This function calculates and adds multiple volume-based indicators to the input DataFrame,
+/// which is useful for combining multiple indicators in a single call.
+///
+/// # Arguments
+///
+/// * `df` - DataFrame containing OHLCV data
+///
+/// # Returns
+///
+/// * `PolarsResult<DataFrame>` - DataFrame with added volume indicators
+///
+/// # Example
+///
+/// ```
+/// use polars::prelude::*;
+/// use ta_lib_in_rust::indicators::volume::add_volume_indicators;
+///
+/// // Create or load a DataFrame with OHLCV data
+/// let df = DataFrame::default(); // Replace with actual data
+///
+/// // Add volume indicators
+/// let df_with_indicators = add_volume_indicators(&df).unwrap();
+/// ```
+pub fn add_volume_indicators(df: &DataFrame) -> PolarsResult<DataFrame> {
+    let mut result_df = df.clone();
+
+    // Calculate On Balance Volume (OBV)
+    let obv = calculate_obv(df)?;
+    result_df.with_column(obv)?;
+
+    // Calculate Chaikin Money Flow (CMF) with default period of 20
+    let cmf = calculate_cmf(df, 20)?;
+    result_df.with_column(cmf)?;
+
+    // Calculate Money Flow Index (MFI) with default period of 14
+    let mfi = calculate_mfi(df, 14)?;
+    result_df.with_column(mfi)?;
+
+    Ok(result_df)
+}
 
 #[cfg(test)]
 mod tests {
-    use polars::prelude::*;
+    use super::*;
+    use crate::indicators::test_util::create_test_ohlcv_df;
 
-    // Helper function to create test DataFrame with OHLCV data
-    pub fn create_test_ohlcv_df() -> DataFrame {
-        let open = Series::new("open".into(), &[10.0, 11.0, 12.0, 11.5, 12.5, 13.0, 14.0]);
-        let high = Series::new("high".into(), &[12.0, 13.0, 13.5, 12.5, 13.5, 15.0, 15.5]);
-        let low = Series::new("low".into(), &[9.5, 10.5, 11.0, 10.5, 11.5, 12.5, 13.5]);
-        let close = Series::new("close".into(), &[11.0, 12.0, 13.0, 11.0, 13.0, 14.0, 14.5]);
-        let volume = Series::new(
-            "volume".into(),
-            &[1000.0, 1500.0, 2000.0, 1800.0, 2200.0, 2500.0, 3000.0],
-        );
-
-        DataFrame::new(vec![
-            open.into(),
-            high.into(),
-            low.into(),
-            close.into(),
-            volume.into(),
-        ])
-        .unwrap()
+    #[test]
+    fn test_add_volume_indicators() {
+        let df = create_test_ohlcv_df();
+        let result = add_volume_indicators(&df).unwrap();
+        
+        // Check that indicators were added
+        assert!(result.schema().contains("obv"));
+        assert!(result.schema().contains("cmf_20"));
+        assert!(result.schema().contains("mfi_14"));
     }
 }

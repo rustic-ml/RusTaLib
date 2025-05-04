@@ -7,81 +7,6 @@ use crate::indicators::{
 };
 use polars::prelude::*;
 
-// Define trading types and structures directly in this file
-pub trait TradingStrategy {
-    type Params;
-
-    fn name(&self) -> String;
-    fn timeframe(&self) -> String;
-    fn prepare_data(&self, df: &DataFrame) -> PolarsResult<DataFrame>;
-    fn generate_signals(&self, df: &DataFrame) -> PolarsResult<Vec<TradeRecord>>;
-    fn backtest(&self, df: &DataFrame, params: &DataFetchParams) -> PolarsResult<BacktestSummary>;
-    fn set_params(&mut self, params: Self::Params);
-    fn get_params(&self) -> Self::Params;
-}
-
-#[derive(Debug, Clone)]
-pub enum TradeDirection {
-    Long,
-    Short,
-}
-
-#[derive(Debug, Clone)]
-pub struct TradeRecord {
-    pub symbol: String,
-    pub entry_time: String,
-    pub entry_price: f64,
-    pub exit_time: String,
-    pub exit_price: f64,
-    pub direction: TradeDirection,
-    pub pnl: f64,
-    pub exit_reason: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct TradePosition {
-    pub entry_price: f64,
-    pub entry_time: String,
-    pub entry_index: usize,
-    pub direction: TradeDirection,
-}
-
-#[derive(Debug, Clone)]
-pub struct DataFetchParams {
-    pub symbol: String,
-    pub start_date: String,
-    pub end_date: String,
-    pub timeframe: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct BacktestSummary {
-    pub strategy_name: String,
-    pub total_trades: usize,
-    pub winning_trades: usize,
-    pub losing_trades: usize,
-    pub win_rate: f64,
-    pub average_pnl: f64,
-    pub total_pnl: f64,
-    pub trade_records: Vec<TradeRecord>,
-}
-
-// Helper function to process data with indicators
-pub fn process_data_with_indicators<F>(df: &DataFrame, processor: F) -> PolarsResult<DataFrame>
-where
-    F: FnOnce(&DataFrame) -> PolarsResult<DataFrame>,
-{
-    // Ensure we have required columns
-    if !df.schema().iter().any(|(name, _)| name == "close") {
-        return Err(PolarsError::ComputeError(
-            "DataFrame must contain a 'close' column".into(),
-        ));
-    }
-
-    // Process the data
-    processor(df)
-}
-
 /// Strategy parameters for an enhanced minute-based multi-indicator strategy
 ///
 /// This strategy combines several specialized intraday indicators to provide
@@ -741,4 +666,4 @@ pub fn calculate_performance(
         profit_factor,
         avg_profit_per_trade,
     )
-}
+} 
