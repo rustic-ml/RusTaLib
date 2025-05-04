@@ -45,8 +45,9 @@ pub fn calculate_mfi(df: &DataFrame, window: usize) -> PolarsResult<Series> {
         || !df.schema().contains("volume")
     {
         return Err(PolarsError::ShapeMismatch(
-            "Missing required columns for MFI calculation. Required: high, low, close, volume".to_string()
-            .into(),
+            "Missing required columns for MFI calculation. Required: high, low, close, volume"
+                .to_string()
+                .into(),
         ));
     }
 

@@ -339,10 +339,10 @@ pub fn run_strategy(
             let time_value = hour * 60 + minute; // Convert to minutes since midnight
 
             // Check if we're in allowed trading sessions
-            let morning_allowed = !params.filter_morning_session
-                || (9 * 60 + 30..11 * 60).contains(&time_value);
-            let lunch_allowed = !params.filter_lunch_session
-                || !(11 * 60 + 30..13 * 60 + 30).contains(&time_value);
+            let morning_allowed =
+                !params.filter_morning_session || (9 * 60 + 30..11 * 60).contains(&time_value);
+            let lunch_allowed =
+                !params.filter_lunch_session || !(11 * 60 + 30..13 * 60 + 30).contains(&time_value);
             let afternoon_allowed =
                 !params.filter_afternoon_session || (14 * 60..16 * 60).contains(&time_value);
 

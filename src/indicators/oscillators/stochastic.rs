@@ -46,8 +46,9 @@ pub fn calculate_stochastic(
         || !df.schema().contains("close")
     {
         return Err(PolarsError::ShapeMismatch(
-            "Missing required columns for Stochastic calculation. Required: high, low, close".to_string()
-            .into(),
+            "Missing required columns for Stochastic calculation. Required: high, low, close"
+                .to_string()
+                .into(),
         ));
     }
 

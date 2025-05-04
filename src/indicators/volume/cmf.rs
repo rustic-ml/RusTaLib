@@ -40,8 +40,9 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
         || !df.schema().contains("volume")
     {
         return Err(PolarsError::ShapeMismatch(
-            "Missing required columns for CMF calculation. Required: high, low, close, volume".to_string()
-            .into(),
+            "Missing required columns for CMF calculation. Required: high, low, close, volume"
+                .to_string()
+                .into(),
         ));
     }
 

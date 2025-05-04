@@ -38,8 +38,9 @@ pub fn calculate_williams_r(df: &DataFrame, window: usize) -> PolarsResult<Serie
         || !df.schema().contains("close")
     {
         return Err(PolarsError::ShapeMismatch(
-            "Missing required columns for Williams %R calculation. Required: high, low, close".to_string()
-            .into(),
+            "Missing required columns for Williams %R calculation. Required: high, low, close"
+                .to_string()
+                .into(),
         ));
     }
 

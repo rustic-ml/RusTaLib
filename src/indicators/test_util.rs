@@ -44,7 +44,6 @@ pub fn create_test_ohlcv_df() -> DataFrame {
     }
 
     // Create the DataFrame
-    
 
     DataFrame::new(vec![
         Series::new("open".into(), open).into(),

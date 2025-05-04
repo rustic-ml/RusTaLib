@@ -32,7 +32,9 @@ pub fn calculate_psar(df: &DataFrame, af_step: f64, af_max: f64) -> PolarsResult
     // Validate required columns
     if !df.schema().contains("high") || !df.schema().contains("low") {
         return Err(PolarsError::ShapeMismatch(
-            "Missing required columns for PSAR calculation. Required: high, low".to_string().into(),
+            "Missing required columns for PSAR calculation. Required: high, low"
+                .to_string()
+                .into(),
         ));
     }
 
@@ -43,7 +45,9 @@ pub fn calculate_psar(df: &DataFrame, af_step: f64, af_max: f64) -> PolarsResult
     let height = df.height();
     if height < 2 {
         return Err(PolarsError::ShapeMismatch(
-            "Not enough data points for PSAR calculation. Need at least 2.".to_string().into(),
+            "Not enough data points for PSAR calculation. Need at least 2."
+                .to_string()
+                .into(),
         ));
     }
 

@@ -1,6 +1,6 @@
 [package]
 name = "ta-lib-in-rust"
-version = "1.0.3"
+version = "1.0.4"
 edition = "2021"
 description = "A library of technical indicators for financial analysis, similar to TA-Lib"
 authors = ["Celsis Durham <durhamcelsis@gmail.com>"]
@@ -19,7 +19,7 @@ exclude = [
     # Use a trailing slash '/' to ensure it's treated as a directory.
     "examples/",
     "target/",
-    
+
     ".gitignore",
     "Cargo.lock",
 
