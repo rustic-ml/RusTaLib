@@ -176,7 +176,7 @@ pub fn run_strategy(
         "close",
     )?;
     let atr = calculate_atr(df, params.atr_period)?;
-    let (bb_middle, bb_upper, bb_lower) =
+    let (_bb_middle, bb_upper, bb_lower) =
         calculate_bollinger_bands(df, params.bb_period, params.bb_std_dev, "close")?;
 
     // Extract values for calculations
@@ -309,7 +309,7 @@ pub fn run_strategy(
         let price = close.get(i).unwrap_or(0.0);
         let ema_fast_val = ema_fast_vals.get(i).unwrap_or(0.0);
         let ema_slow_val = ema_slow_vals.get(i).unwrap_or(0.0);
-        let wma_val = wma_vals.get(i).unwrap_or(0.0);
+        let _wma_val = wma_vals.get(i).unwrap_or(0.0);
         let rsi_val = rsi_vals.get(i).unwrap_or(0.0);
         let macd_val = macd_vals.get(i).unwrap_or(0.0);
         let macd_signal_val = macd_signal_vals.get(i).unwrap_or(0.0);
@@ -318,12 +318,12 @@ pub fn run_strategy(
         let bb_lower_val = bb_lower_vals.get(i).unwrap_or(0.0);
 
         // Previous values
-        let prev_high = if i > 0 {
+        let _prev_high = if i > 0 {
             high.get(i - 1).unwrap_or(0.0)
         } else {
             0.0
         };
-        let prev_low = if i > 0 {
+        let _prev_low = if i > 0 {
             low.get(i - 1).unwrap_or(0.0)
         } else {
             0.0
@@ -473,7 +473,7 @@ pub fn calculate_performance(
     let mut shares = 0.0;
     let mut trades = 0;
     let mut wins = 0;
-    let mut losses = 0;
+    let mut _losses = 0;
     let mut buy_price = 0.0;
     let mut total_profit = 0.0;
     let mut total_loss = 0.0;
@@ -527,7 +527,7 @@ pub fn calculate_performance(
                 wins += 1;
                 total_profit += trade_profit;
             } else {
-                losses += 1;
+                _losses += 1;
                 total_loss += trade_profit.abs();
             }
 
@@ -557,7 +557,7 @@ pub fn calculate_performance(
                 wins += 1;
                 total_profit += trade_profit;
             } else {
-                losses += 1;
+                _losses += 1;
                 total_loss += trade_profit.abs();
             }
 

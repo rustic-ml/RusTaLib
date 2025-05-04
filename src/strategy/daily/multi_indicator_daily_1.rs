@@ -380,7 +380,7 @@ pub fn calculate_performance(
     let mut shares = 0.0;
     let mut trades = 0;
     let mut wins = 0;
-    let mut losses = 0;
+    let mut _losses = 0;
     let mut buy_price = 0.0;
     let mut total_profit = 0.0;
     let mut total_loss = 0.0;
@@ -419,7 +419,7 @@ pub fn calculate_performance(
                 wins += 1;
                 total_profit += trade_profit;
             } else {
-                losses += 1;
+                _losses += 1;
                 total_loss += trade_profit.abs();
             }
 

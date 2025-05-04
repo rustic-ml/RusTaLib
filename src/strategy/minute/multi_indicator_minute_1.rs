@@ -487,7 +487,7 @@ pub fn calculate_performance(
     let mut shares = 0.0;
     let mut trades = 0;
     let mut wins = 0;
-    let mut losses = 0;
+    let mut _losses = 0;
     let mut buy_price = 0.0;
     let mut entry_time = 0;
     let mut total_profit = 0.0;
@@ -532,7 +532,7 @@ pub fn calculate_performance(
                 wins += 1;
                 total_profit += trade_profit;
             } else {
-                losses += 1;
+                _losses += 1;
                 total_loss += trade_profit.abs();
             }
 
@@ -559,7 +559,7 @@ pub fn calculate_performance(
                 wins += 1;
                 total_profit += trade_profit;
             } else {
-                losses += 1;
+                _losses += 1;
                 total_loss += trade_profit.abs();
             }
 
@@ -591,8 +591,13 @@ pub fn calculate_performance(
     // Final calculations
     let final_value = capital;
     let total_return = (final_value / start_capital - 1.0) * 100.0;
-    let win_rate = if trades > 0 {
-        (wins as f64 / trades as f64) * 100.0
+    let win_percent = if trades > 0 {
+        wins as f64 / trades as f64 * 100.0
+    } else {
+        0.0
+    };
+    let _loss_percent = if trades > 0 {
+        _losses as f64 / trades as f64 * 100.0
     } else {
         0.0
     };
@@ -611,7 +616,7 @@ pub fn calculate_performance(
         final_value,
         total_return,
         trades,
-        win_rate,
+        win_percent,
         max_drawdown,
         profit_factor,
         avg_trade_duration,

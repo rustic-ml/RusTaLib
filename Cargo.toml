@@ -8,7 +8,7 @@ license = "MIT"
 repository = "https://github.com/rustic-ml/technical-indicators"
 documentation = "https://docs.rs/ta-lib-in-rust"
 readme = "README.md"
-keywords = ["finance", "technical-analysis", "trading", "indicators", "stocks", "quant"]
+keywords = ["finance", "technical-analysis", "trading", "indicators", "stocks"]
 categories = ["Algorithms", "API bindings"]
 
 [dependencies]

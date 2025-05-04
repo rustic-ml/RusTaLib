@@ -352,7 +352,7 @@ pub fn run_strategy(
         // Volatility analysis
         let high_volatility = atr_val > (price * 0.015); // ATR more than 1.5% of price
         let price_momentum = (price - prev_price) / prev_price * 100.0;
-        let strong_momentum = price_momentum.abs() > 1.0; // More than 1% price change
+        let _strong_momentum = price_momentum.abs() > 1.0; // More than 1% movement
 
         // Volume analysis
         let high_relative_volume = current_volume > (avg_volume * params.volume_threshold);

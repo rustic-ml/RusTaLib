@@ -193,13 +193,13 @@ pub fn run_strategy(
         "close",
     )?;
     let atr = calculate_atr(df, params.atr_period)?;
-    let (bb_middle, bb_upper, bb_lower) =
+    let (_bb_middle, bb_upper, bb_lower) =
         calculate_bollinger_bands(df, params.bb_period, params.bb_std_dev, "close")?;
 
     // Extract values for calculations
     let close = df.column("close")?.f64()?;
-    let high = df.column("high")?.f64()?;
-    let low = df.column("low")?.f64()?;
+    let _high = df.column("high")?.f64()?;
+    let _low = df.column("low")?.f64()?;
     let volume = df.column("volume")?.f64()?;
 
     // Fix temporary value dropped while borrowed errors
@@ -225,10 +225,10 @@ pub fn run_strategy(
     let atr_vals = atr_cloned.f64()?;
 
     let bb_upper_cloned = bb_upper.clone();
-    let bb_upper_vals = bb_upper_cloned.f64()?;
+    let _bb_upper_vals = bb_upper_cloned.f64()?;
 
     let bb_lower_cloned = bb_lower.clone();
-    let bb_lower_vals = bb_lower_cloned.f64()?;
+    let _bb_lower_vals = bb_lower_cloned.f64()?;
 
     // Create arrays for signals and levels
     let mut buy_signals = Vec::with_capacity(df.height());
@@ -490,11 +490,11 @@ pub fn calculate_performance(
     let mut shares = 0.0;
     let mut trades = 0;
     let mut wins = 0;
-    let mut losses = 0;
+    let mut _losses = 0;
     let mut buy_price = 0.0;
     let mut entry_time = 0;
-    let mut total_profit = 0.0;
-    let mut total_loss = 0.0;
+    let mut _total_profit = 0.0;
+    let mut _total_loss = 0.0;
     let mut total_trade_duration = 0;
     let mut equity_curve = Vec::with_capacity(close.len());
     let mut max_equity = start_capital;
@@ -502,7 +502,7 @@ pub fn calculate_performance(
     let mut trade_returns = Vec::new();
 
     // Track the current day to handle end-of-day reporting
-    let mut current_day = 0;
+    let mut _current_day = 0;
 
     // Determine starting point with valid signals
     let start_idx = buy_signals
@@ -558,10 +558,10 @@ pub fn calculate_performance(
             // Record success/failure and profit/loss
             if trade_profit > 0.0 {
                 wins += 1;
-                total_profit += trade_profit;
+                _total_profit += trade_profit;
             } else {
-                losses += 1;
-                total_loss += trade_profit.abs();
+                _losses += 1;
+                _total_loss += trade_profit.abs();
             }
 
             total_trade_duration += trade_duration;
@@ -569,7 +569,7 @@ pub fn calculate_performance(
             shares = 0.0;
 
             // Note the reason for exit for detailed reporting
-            let exit_reason = if hit_stop {
+            let _exit_reason = if hit_stop {
                 "Stop Loss"
             } else if hit_target {
                 "Take Profit"
@@ -592,7 +592,7 @@ pub fn calculate_performance(
             }
         }
 
-        current_day = day;
+        _current_day = day;
     }
 
     // Close any open position at the end of the backtest
