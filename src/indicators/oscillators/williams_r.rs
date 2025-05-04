@@ -33,9 +33,13 @@ use polars::prelude::*;
 /// ```
 pub fn calculate_williams_r(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     // Validate required columns
-    if !df.schema().contains("high") || !df.schema().contains("low") || !df.schema().contains("close") {
+    if !df.schema().contains("high")
+        || !df.schema().contains("low")
+        || !df.schema().contains("close")
+    {
         return Err(PolarsError::ShapeMismatch(
-            format!("Missing required columns for Williams %R calculation. Required: high, low, close").into()
+            "Missing required columns for Williams %R calculation. Required: high, low, close".to_string()
+            .into(),
         ));
     }
 
@@ -46,32 +50,32 @@ pub fn calculate_williams_r(df: &DataFrame, window: usize) -> PolarsResult<Serie
 
     // Calculate Williams %R
     let mut williams_r_values = Vec::with_capacity(df.height());
-    
+
     // Fill initial values with NaN
-    for _ in 0..window-1 {
+    for _ in 0..window - 1 {
         williams_r_values.push(f64::NAN);
     }
-    
+
     // Calculate Williams %R for the remaining data points
-    for i in window-1..df.height() {
+    for i in window - 1..df.height() {
         let mut highest_high = f64::NEG_INFINITY;
         let mut lowest_low = f64::INFINITY;
         let mut valid_data = true;
-        
+
         // Find highest high and lowest low in the window
-        for j in i-(window-1)..=i {
+        for j in i - (window - 1)..=i {
             let h = high.get(j).unwrap_or(f64::NAN);
             let l = low.get(j).unwrap_or(f64::NAN);
-            
+
             if h.is_nan() || l.is_nan() {
                 valid_data = false;
                 break;
             }
-            
+
             highest_high = highest_high.max(h);
             lowest_low = lowest_low.min(l);
         }
-        
+
         if !valid_data || (highest_high - lowest_low).abs() < 1e-10 {
             williams_r_values.push(f64::NAN);
         } else {
@@ -84,7 +88,7 @@ pub fn calculate_williams_r(df: &DataFrame, window: usize) -> PolarsResult<Serie
             }
         }
     }
-    
+
     // Create Series with Williams %R values
     let name = format!("williams_r_{}", window);
     Ok(Series::new(name.into(), williams_r_values))
@@ -99,7 +103,7 @@ mod tests {
     fn test_calculate_williams_r() {
         let df = create_test_ohlcv_df();
         let williams_r = calculate_williams_r(&df, 14).unwrap();
-        
+
         // Williams %R should be in the range [-100, 0]
         for i in 14..df.height() {
             let value = williams_r.f64().unwrap().get(i).unwrap();
@@ -107,10 +111,10 @@ mod tests {
                 assert!(value >= -100.0 && value <= 0.0);
             }
         }
-        
+
         // Williams %R for the first (window-1) periods should be NaN
         for i in 0..13 {
             assert!(williams_r.f64().unwrap().get(i).unwrap().is_nan());
         }
     }
-} 
+}

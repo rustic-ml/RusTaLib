@@ -3,16 +3,16 @@
 use polars::prelude::*;
 
 // Module declarations
-mod rsi;
 mod macd;
-mod williams_r;
+mod rsi;
 mod stochastic;
+mod williams_r;
 
 // Re-export functions
-pub use rsi::calculate_rsi;
 pub use macd::calculate_macd;
-pub use williams_r::calculate_williams_r;
+pub use rsi::calculate_rsi;
 pub use stochastic::calculate_stochastic;
+pub use williams_r::calculate_williams_r;
 
 #[cfg(test)]
 mod tests {
@@ -68,7 +68,7 @@ pub fn add_oscillator_indicators(df: &DataFrame) -> PolarsResult<DataFrame> {
     // Williams %R
     let williams_r_14 = calculate_williams_r(df, 14)?;
     result_df.with_column(williams_r_14)?;
-    
+
     // Stochastic Oscillator
     let (stoch_k, stoch_d) = calculate_stochastic(df, 14, 3, 3)?;
     result_df.with_column(stoch_k)?;
@@ -86,7 +86,7 @@ mod integration_tests {
     fn test_add_oscillator_indicators() {
         let df = create_test_ohlcv_df();
         let result = add_oscillator_indicators(&df).unwrap();
-        
+
         // Check that indicators were added
         assert!(result.schema().contains("rsi_14"));
         assert!(result.schema().contains("macd_12_26"));

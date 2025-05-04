@@ -34,12 +34,14 @@ use polars::prelude::*;
 /// ```
 pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     // Validate that necessary columns exist
-    if !df.schema().contains("high") 
-        || !df.schema().contains("low") 
-        || !df.schema().contains("close") 
-        || !df.schema().contains("volume") {
+    if !df.schema().contains("high")
+        || !df.schema().contains("low")
+        || !df.schema().contains("close")
+        || !df.schema().contains("volume")
+    {
         return Err(PolarsError::ShapeMismatch(
-            format!("Missing required columns for CMF calculation. Required: high, low, close, volume").into()
+            "Missing required columns for CMF calculation. Required: high, low, close, volume".to_string()
+            .into(),
         ));
     }
 
@@ -55,11 +57,12 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
         let high_val = high.get(i).unwrap_or(f64::NAN);
         let low_val = low.get(i).unwrap_or(f64::NAN);
         let close_val = close.get(i).unwrap_or(f64::NAN);
-        
+
         if high_val.is_nan() || low_val.is_nan() || close_val.is_nan() || high_val == low_val {
             money_flow_multipliers.push(f64::NAN);
         } else {
-            let multiplier = ((close_val - low_val) - (high_val - close_val)) / (high_val - low_val);
+            let multiplier =
+                ((close_val - low_val) - (high_val - close_val)) / (high_val - low_val);
             money_flow_multipliers.push(multiplier);
         }
     }
@@ -69,7 +72,7 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     for i in 0..df.height() {
         let mfm = money_flow_multipliers[i];
         let vol = volume.get(i).unwrap_or(f64::NAN);
-        
+
         if mfm.is_nan() || vol.is_nan() {
             money_flow_volumes.push(f64::NAN);
         } else {
@@ -79,32 +82,32 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
 
     // Calculate CMF values
     let mut cmf_values = Vec::with_capacity(df.height());
-    
+
     // Fill in NaN values for the initial window
-    for _ in 0..window-1 {
+    for _ in 0..window - 1 {
         cmf_values.push(f64::NAN);
     }
-    
+
     // Calculate CMF for each period after the initial window
-    for i in window-1..df.height() {
+    for i in window - 1..df.height() {
         let mut money_flow_volume_sum = 0.0;
         let mut volume_sum = 0.0;
         let mut has_nan = false;
-        
+
         // Sum up money flow volumes and volumes over the window
         for j in (i - window + 1)..=i {
             let mfv = money_flow_volumes[j];
             let vol = volume.get(j).unwrap_or(f64::NAN);
-            
+
             if mfv.is_nan() || vol.is_nan() {
                 has_nan = true;
                 break;
             }
-            
+
             money_flow_volume_sum += mfv;
             volume_sum += vol;
         }
-        
+
         if has_nan || volume_sum.abs() < 1e-10 {
             cmf_values.push(f64::NAN);
         } else {
@@ -112,7 +115,7 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
             cmf_values.push(cmf);
         }
     }
-    
+
     // Create a Series with the CMF values
     let name = format!("cmf_{}", window);
     Ok(Series::new(name.into(), cmf_values))
@@ -127,7 +130,7 @@ mod tests {
     fn test_calculate_cmf() {
         let df = create_test_ohlcv_df();
         let cmf = calculate_cmf(&df, 20).unwrap();
-        
+
         // CMF should be in the range [-1, 1]
         for i in 20..df.height() {
             let value = cmf.f64().unwrap().get(i).unwrap();
@@ -135,7 +138,7 @@ mod tests {
                 assert!(value >= -1.0 && value <= 1.0);
             }
         }
-        
+
         // CMF for the first (window-1) periods should be NaN
         for i in 0..19 {
             assert!(cmf.f64().unwrap().get(i).unwrap().is_nan());

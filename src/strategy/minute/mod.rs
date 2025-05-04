@@ -32,11 +32,11 @@
 //! }
 //! ```
 
+pub mod enhanced_minute_strategy;
 pub mod multi_indicator_minute_1;
 pub mod multi_indicator_minute_2;
 pub mod multi_indicator_minute_3;
 pub mod multi_indicator_minute_4;
-pub mod enhanced_minute_strategy;
 
 pub use multi_indicator_minute_1::{
     run_strategy as run_strategy_1, StrategyParams as StrategyParams1,

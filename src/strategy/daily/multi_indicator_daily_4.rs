@@ -748,12 +748,10 @@ pub fn calculate_performance(
     };
     let profit_factor = if total_loss > 0.0 {
         total_profit / total_loss
+    } else if total_profit > 0.0 {
+        f64::MAX
     } else {
-        if total_profit > 0.0 {
-            f64::MAX
-        } else {
-            0.0
-        }
+        0.0
     };
 
     (

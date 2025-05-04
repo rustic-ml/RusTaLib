@@ -3,14 +3,14 @@
 use polars::prelude::*;
 
 // Modules for volume indicators
-mod obv;
 mod cmf;
 mod mfi;
+mod obv;
 
 // Re-export volume indicators
-pub use obv::calculate_obv;
 pub use cmf::calculate_cmf;
 pub use mfi::calculate_mfi;
+pub use obv::calculate_obv;
 
 /// Add volume-based indicators to a DataFrame
 ///
@@ -64,7 +64,7 @@ mod tests {
     fn test_add_volume_indicators() {
         let df = create_test_ohlcv_df();
         let result = add_volume_indicators(&df).unwrap();
-        
+
         // Check that indicators were added
         assert!(result.schema().contains("obv"));
         assert!(result.schema().contains("cmf_20"));

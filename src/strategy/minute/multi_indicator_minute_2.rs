@@ -285,7 +285,7 @@ pub fn run_strategy(
             // Extract the hour from the time string
             let hour: usize = time_str
                 .split(' ')
-                .last()
+                .next_back()
                 .unwrap_or("")
                 .split(':')
                 .next()

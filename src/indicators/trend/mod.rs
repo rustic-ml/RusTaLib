@@ -64,7 +64,7 @@ mod tests {
     fn test_add_trend_indicators() {
         let df = create_test_ohlcv_df();
         let result = add_trend_indicators(&df).unwrap();
-        
+
         // Check that indicators were added
         assert!(result.schema().contains("psar_0_02_0_20"));
     }

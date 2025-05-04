@@ -242,7 +242,7 @@ pub fn run_strategy(
     // Calculate average volume for comparison
     let avg_volume: f64 = volume
         .iter()
-        .filter_map(|v| v.clone())
+        .filter_map(|v| v)
         .take(100) // Use first 100 values or fewer
         .sum::<f64>()
         / 100.0;
@@ -334,17 +334,17 @@ pub fn run_strategy(
 
             // Parse hour:minute
             let parts: Vec<&str> = time_str.split(':').collect();
-            let hour: usize = parts.get(0).unwrap_or(&"0").parse().unwrap_or(0);
+            let hour: usize = parts.first().unwrap_or(&"0").parse().unwrap_or(0);
             let minute: usize = parts.get(1).unwrap_or(&"0").parse().unwrap_or(0);
             let time_value = hour * 60 + minute; // Convert to minutes since midnight
 
             // Check if we're in allowed trading sessions
             let morning_allowed = !params.filter_morning_session
-                || (time_value >= 9 * 60 + 30 && time_value < 11 * 60);
+                || (9 * 60 + 30..11 * 60).contains(&time_value);
             let lunch_allowed = !params.filter_lunch_session
-                || (time_value < 11 * 60 + 30 || time_value >= 13 * 60 + 30);
+                || !(11 * 60 + 30..13 * 60 + 30).contains(&time_value);
             let afternoon_allowed =
-                !params.filter_afternoon_session || (time_value >= 14 * 60 && time_value < 16 * 60);
+                !params.filter_afternoon_session || (14 * 60..16 * 60).contains(&time_value);
 
             morning_allowed && lunch_allowed && afternoon_allowed
         } else {
