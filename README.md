@@ -78,6 +78,25 @@ fn main() -> PolarsResult<()> {
 }
 ```
 
+### Reading Data from CSV
+
+When reading data from CSV files, use the `CsvReadOptions` approach compatible with Polars 0.46.0:
+
+```rust
+// Read a CSV file with headers
+let df = CsvReadOptions::default()
+    .with_has_header(true)
+    .try_into_reader_with_file_path(Some("path/to/data.csv".into()))?
+    .finish()?;
+
+// If your data has numeric columns as integers but you need them as floats (common for volume)
+let df = df.lazy()
+    .with_columns([
+        col("volume").cast(DataType::Float64),
+    ])
+    .collect()?;
+```
+
 ## Running Tests
 
 ```bash

@@ -13,11 +13,11 @@ use polars::prelude::*;
 pub fn calculate_ht_trendmode(df: &DataFrame, column: &str) -> PolarsResult<Series> {
     let series = df.column(column)?.f64()?.clone();
     let mut result = Vec::with_capacity(series.len());
-    
+
     // Just return NaN values for all points as placeholder
     for _ in 0..series.len() {
         result.push(f64::NAN);
     }
-    
+
     Ok(Series::new("ht_trendmode".into(), result))
-} 
+}

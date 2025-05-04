@@ -12,4 +12,4 @@ pub use roc::calculate_roc;
 // pub use mom::calculate_mom;
 // pub use bop::calculate_bop;
 // pub use cci::calculate_cci;
-// pub use cmo::calculate_cmo; 
+// pub use cmo::calculate_cmo;

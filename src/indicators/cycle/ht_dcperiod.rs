@@ -15,11 +15,11 @@ pub fn calculate_ht_dcperiod(df: &DataFrame, column: &str) -> PolarsResult<Serie
     // implementation. For now, we'll return a placeholder.
     let series = df.column(column)?.f64()?.clone();
     let mut result = Vec::with_capacity(series.len());
-    
+
     // Just return NaN values for all points as placeholder
     for _ in 0..series.len() {
         result.push(f64::NAN);
     }
-    
+
     Ok(Series::new("ht_dcperiod".into(), result))
-} 
+}

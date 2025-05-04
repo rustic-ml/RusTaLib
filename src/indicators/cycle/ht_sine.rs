@@ -14,12 +14,15 @@ pub fn calculate_ht_sine(df: &DataFrame, column: &str) -> PolarsResult<(Series, 
     let series = df.column(column)?.f64()?.clone();
     let mut sine = Vec::with_capacity(series.len());
     let mut leadsine = Vec::with_capacity(series.len());
-    
+
     // Just return NaN values for all points as placeholder
     for _ in 0..series.len() {
         sine.push(f64::NAN);
         leadsine.push(f64::NAN);
     }
-    
-    Ok((Series::new("sine".into(), sine), Series::new("leadsine".into(), leadsine)))
-} 
+
+    Ok((
+        Series::new("sine".into(), sine),
+        Series::new("leadsine".into(), leadsine),
+    ))
+}

@@ -1,5 +1,5 @@
-use polars::prelude::*;
 use super::aroon::calculate_aroon;
+use polars::prelude::*;
 
 /// Calculates the Aroon Oscillator
 ///
@@ -13,9 +13,9 @@ use super::aroon::calculate_aroon;
 /// Returns a PolarsResult containing the Aroon Oscillator Series (Aroon Up - Aroon Down)
 pub fn calculate_aroon_osc(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     let (aroon_up, aroon_down) = calculate_aroon(df, window)?;
-    
+
     // Aroon Oscillator = Aroon Up - Aroon Down
     let aroon_osc = (&aroon_up - &aroon_down)?;
-    
+
     Ok(aroon_osc.with_name("aroon_osc".into()))
-} 
+}

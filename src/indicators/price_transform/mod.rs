@@ -9,4 +9,4 @@ mod wclprice;
 pub use avgprice::calculate_avgprice;
 pub use medprice::calculate_medprice;
 pub use typprice::calculate_typprice;
-pub use wclprice::calculate_wclprice; 
+pub use wclprice::calculate_wclprice;

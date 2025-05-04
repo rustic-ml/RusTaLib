@@ -17,4 +17,4 @@ mod tests {
         let df = create_test_ohlcv_df();
         let _ = calculate_cmf(&df, 14).unwrap();
     }
-} 
+}

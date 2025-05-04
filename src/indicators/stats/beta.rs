@@ -1,5 +1,5 @@
-use polars::prelude::*;
 use crate::util::dataframe_utils::check_window_size;
+use polars::prelude::*;
 
 /// Calculates Beta - regression coefficient between two series
 ///
@@ -14,42 +14,42 @@ use crate::util::dataframe_utils::check_window_size;
 ///
 /// Returns a PolarsResult containing the Beta Series
 pub fn calculate_beta(
-    df: &DataFrame, 
-    price_column: &str, 
-    market_column: &str, 
-    window: usize
+    df: &DataFrame,
+    price_column: &str,
+    market_column: &str,
+    window: usize,
 ) -> PolarsResult<Series> {
     check_window_size(df, window, "Beta")?;
-    
+
     if !df.schema().contains(price_column) || !df.schema().contains(market_column) {
         return Err(PolarsError::ComputeError(
-            format!("Beta calculation requires {price_column} and {market_column} columns").into()
+            format!("Beta calculation requires {price_column} and {market_column} columns").into(),
         ));
     }
-    
+
     let price = df.column(price_column)?.f64()?;
     let market = df.column(market_column)?.f64()?;
-    
+
     let mut beta_values = Vec::with_capacity(df.height());
-    
+
     // Fill initial values with NaN
-    for _ in 0..window-1 {
+    for _ in 0..window - 1 {
         beta_values.push(f64::NAN);
     }
-    
+
     // Calculate Beta for each window
-    for i in window-1..df.height() {
+    for i in window - 1..df.height() {
         let mut sum_xy = 0.0;
         let mut sum_x = 0.0;
         let mut sum_y = 0.0;
         let mut sum_x2 = 0.0;
         let mut count = 0;
-        
+
         for j in 0..window {
             let x_idx = i - j;
             let x = market.get(x_idx).unwrap_or(f64::NAN);
             let y = price.get(x_idx).unwrap_or(f64::NAN);
-            
+
             if !x.is_nan() && !y.is_nan() {
                 sum_xy += x * y;
                 sum_x += x;
@@ -58,12 +58,12 @@ pub fn calculate_beta(
                 count += 1;
             }
         }
-        
+
         if count > 1 {
             // Beta formula: (n*sum_xy - sum_x*sum_y) / (n*sum_x2 - sum_x^2)
             let numerator = (count as f64 * sum_xy) - (sum_x * sum_y);
             let denominator = (count as f64 * sum_x2) - (sum_x * sum_x);
-            
+
             if denominator != 0.0 {
                 beta_values.push(numerator / denominator);
             } else {
@@ -73,31 +73,39 @@ pub fn calculate_beta(
             beta_values.push(f64::NAN);
         }
     }
-    
+
     Ok(Series::new("beta".into(), beta_values))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_beta() {
         // Create test DataFrame
-        let close = Series::new("close".into(), &[10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0]);
-        let market = Series::new("market".into(), &[100.0, 105.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 145.0]);
+        let close = Series::new(
+            "close".into(),
+            &[10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0],
+        );
+        let market = Series::new(
+            "market".into(),
+            &[
+                100.0, 105.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 145.0,
+            ],
+        );
         let df = DataFrame::new(vec![close.into(), market.into()]).unwrap();
-        
+
         let window = 5;
         let beta = calculate_beta(&df, "close", "market", window).unwrap();
-        
+
         // First window-1 values should be NaN
-        for i in 0..window-1 {
+        for i in 0..window - 1 {
             assert!(beta.f64().unwrap().get(i).unwrap().is_nan());
         }
-        
+
         // Beta should be around 0.2 for this test data (1 unit price change for 5 unit market change)
         let beta_val = beta.f64().unwrap().get(window).unwrap();
         assert!((beta_val - 0.2).abs() < 0.01);
     }
-} 
+}
