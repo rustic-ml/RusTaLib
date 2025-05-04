@@ -9,7 +9,7 @@ repository = "https://github.com/rustic-ml/technical-indicators"
 documentation = "https://docs.rs/ta-lib-in-rust"
 readme = "README.md"
 keywords = ["finance", "technical-analysis", "trading", "indicators", "stocks"]
-categories = ["Algorithms", "API bindings"]
+categories = []
 
 [dependencies]
 polars = { version = "0.46.0", features = ["lazy", "strings", "temporal", "rolling_window"] }
