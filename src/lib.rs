@@ -245,6 +245,15 @@
 //! }
 //! ```
 //!
+//! ## Advanced Intraday Strategy Example
+//!
+//! See `examples/enhanced_minute_strategy_example.rs` for a full example of an advanced minute-level multi-indicator strategy. This example demonstrates:
+//!
+//! - Loading minute-level OHLCV data from CSV
+//! - Running a multi-indicator strategy with risk management
+//! - Calculating and printing performance metrics
+//! - Saving all signals and indicators to a CSV file (`enhanced_minute_strategy_results.csv`) for further analysis
+//!
 //! See the documentation for each module for more detailed information and examples.
 
 pub mod indicators;

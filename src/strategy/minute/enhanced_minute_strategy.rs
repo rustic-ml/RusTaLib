@@ -11,6 +11,9 @@ use polars::prelude::*;
 ///
 /// This strategy combines several specialized intraday indicators to provide
 /// more effective processing and trading signals for minute-level data.
+///
+/// See the example at `examples/enhanced_minute_strategy_example.rs` for a full demonstration of how to use this strategy.
+/// The example saves all signals and indicators to `enhanced_minute_strategy_results.csv` for further analysis.
 #[derive(Clone)]
 pub struct StrategyParams {
     /// Period for fast EMA

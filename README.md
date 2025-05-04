@@ -1,7 +1,7 @@
 # Technical Indicators (Rust)
 
-[![crates.io](https://img.shields.io/crates/v/technical-indicators.svg)](https://crates.io/crates/technical-indicators) <!-- Placeholder badge -->
-[![docs.rs](https://docs.rs/technical-indicators/badge.svg)](https://docs.rs/technical-indicators) <!-- Placeholder badge -->
+[![crates.io](https://img.shields.io/crates/v/ta-lib-in-rust.svg)](https://crates.io/crates/ta-lib-in-rust) <!-- Placeholder badge -->
+[![docs.rs](https://docs.rs/technical-indicators/badge.svg)](https://docs.rs/ta-lib-in-rust) <!-- Placeholder badge -->
 
 A Rust library for calculating common financial technical indicators using the [Polars](https://pola.rs/) DataFrame library.
 
@@ -42,6 +42,19 @@ This library provides functions to calculate various technical indicators from O
 *   Chaikin Money Flow (CMF)
 *   Average Directional Index (ADX)
 *   Rate of Change (ROC)
+
+## Advanced Example: Enhanced Minute Strategy
+
+This library includes an advanced intraday trading strategy that combines multiple technical indicators for minute-level OHLCV data. See `examples/enhanced_minute_strategy_example.rs` for a full example, which demonstrates:
+
+- Loading minute-level OHLCV data from CSV
+- Running a multi-indicator strategy with risk management
+- Calculating and printing performance metrics
+- Saving all signals and indicators to a CSV file for further analysis
+
+**Output:**
+
+The example saves a file `enhanced_minute_strategy_results.csv` containing all calculated indicators and trading signals for each row of the input data. This can be used for further analysis, visualization, or research.
 
 ## Installation
 

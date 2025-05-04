@@ -1,3 +1,14 @@
+//! Example: Enhanced Minute Multi-Indicator Strategy
+//!
+//! This example demonstrates how to use the enhanced minute-level multi-indicator strategy for intraday trading.
+//!
+//! - Loads minute-level OHLCV data from CSV
+//! - Runs a multi-indicator strategy with risk management
+//! - Calculates and prints performance metrics
+//! - Saves all signals and indicators to `enhanced_minute_strategy_results.csv` for further analysis
+//!
+//! The output CSV contains all calculated indicators and trading signals for each row of the input data. You can use this file for further research, visualization, or strategy refinement.
+
 use polars::prelude::*;
 use ta_lib_in_rust::strategy::minute::enhanced_minute_strategy::{
     calculate_performance, run_strategy, StrategyParams,

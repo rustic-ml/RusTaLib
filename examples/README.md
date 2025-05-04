@@ -16,6 +16,7 @@ Several examples demonstrate how to load data from CSV files:
 - `compare_minute_indicator_strategies.rs` - Shows how to read minute-level OHLCV data and convert integer volume to float
 - `compare_multi_indicator_strategies.rs` - Demonstrates proper CSV reading with column renaming
 - `multi_indicator_strategy_for_daily_ohlcv.rs` - Shows CSV reading with a predefined schema
+- `enhanced_minute_strategy_example.rs` - Demonstrates a multi-indicator intraday strategy for minute-level OHLCV data. Runs a full backtest, prints performance metrics, and saves all signals and indicators to `enhanced_minute_strategy_results.csv` for further analysis.
 
 Note that when using Polars 0.46.0, CSV files should be read using the `CsvReadOptions` approach:
 
