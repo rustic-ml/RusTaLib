@@ -245,32 +245,6 @@
 //! }
 //! ```
 //!
-//! ## Reading CSV Data
-//!
-//! When working with this library, you'll often need to load OHLCV data from CSV files.
-//! With Polars 0.46.0, use the following approach:
-//!
-//! ```rust
-//! use polars::prelude::*;
-//!
-//! fn load_csv_data() -> PolarsResult<DataFrame> {
-//!     // Read a CSV file with headers
-//!     let df = CsvReadOptions::default()
-//!         .with_has_header(true)
-//!         .try_into_reader_with_file_path(Some("path/to/data.csv".into()))?
-//!         .finish()?;
-//!     
-//!     // If you need to cast columns (e.g., volume from i64 to f64)
-//!     let df = df.lazy()
-//!         .with_columns([
-//!             col("volume").cast(DataType::Float64),
-//!         ])
-//!         .collect()?;
-//!     
-//!     Ok(df)
-//! }
-//! ```
-//!
 //! See the documentation for each module for more detailed information and examples.
 
 pub mod indicators;

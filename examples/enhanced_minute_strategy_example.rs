@@ -88,9 +88,9 @@ fn main() -> Result<(), PolarsError> {
     
     // Save results for further analysis
     println!("\nSaving results to 'enhanced_minute_strategy_results.csv'...");
-    let signals_df = signals.indicator_values;
+    let mut signals_df = signals.indicator_values;
     CsvWriter::new(std::io::BufWriter::new(std::fs::File::create("enhanced_minute_strategy_results.csv")?))
-        .finish(&signals_df)?;
+        .finish(&mut signals_df)?;
     
     // Print trade breakdown
     println!("\nTrade Summary:");
@@ -115,7 +115,7 @@ fn main() -> Result<(), PolarsError> {
             .filter(col("buy_signal").eq(lit(1)))
             .group_by([col("date")])
             .agg([col("*").count().alias("trade_count")])
-            .sort(vec![col("trade_count")], Default::default())
+            .sort(["trade_count"], Default::default())
             .collect()?;
         
         println!("\nMost Active Trading Days (Buy Signals):");

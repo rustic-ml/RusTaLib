@@ -44,8 +44,10 @@ pub fn calculate_obv(df: &DataFrame) -> PolarsResult<Series> {
 
 #[cfg(test)]
 mod tests {
+    use crate::indicators;
+
     use super::*;
-    use crate::indicators::volume::tests::create_test_ohlcv_df;
+    use indicators::test_util::create_test_ohlcv_df;
 
     #[test]
     fn test_calculate_obv_basic() {

@@ -13,6 +13,19 @@ readme = "README.md"
 keywords = ["finance", "technical-analysis", "trading", "indicators", "stocks"]
 # Add relevant categories for discoverability
 categories = ["science::financial", "algorithms", "mathematics"]
+# Add the 'exclude' field here
+exclude = [
+    # Add the folder you want to exclude.
+    # Use a trailing slash '/' to ensure it's treated as a directory.
+    "examples/",
+    "target/",
+    ".gitignore",
+    "Cargo.lock",
+
+    # You can add more patterns:
+    # "another_folder/",
+    # "*.log",             # Exclude all .log files
+]
 
 [dependencies]
 polars = { version = "0.46.0", features = ["lazy", "strings", "temporal", "rolling_window"] }
