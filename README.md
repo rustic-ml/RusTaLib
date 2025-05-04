@@ -1,123 +1,171 @@
 # Technical Indicators (Rust)
 
-[![crates.io](https://img.shields.io/crates/v/ta-lib-in-rust.svg)](https://crates.io/crates/ta-lib-in-rust) <!-- Placeholder badge -->
-[![docs.rs](https://docs.rs/ta-lib-in-rust/badge.svg)](https://docs.rs/ta-lib-in-rust) <!-- Placeholder badge -->
+[![crates.io](https://img.shields.io/crates/v/ta-lib-in-rust.svg)](https://crates.io/crates/ta-lib-in-rust)
+[![docs.rs](https://docs.rs/ta-lib-in-rust/badge.svg)](https://docs.rs/ta-lib-in-rust)
 
-A Rust library for calculating common financial technical indicators using the [Polars](https://pola.rs/) DataFrame library.
+A comprehensive Rust library for calculating financial technical indicators and building trading strategies, leveraging the [Polars](https://pola.rs/) DataFrame library for high-performance data analysis.
+
+---
+
+## Project Overview
+
+**Technical Indicators** aims to provide a robust, extensible, and efficient toolkit for quantitative finance, algorithmic trading, and data science in Rust. The library is designed for:
+- **Fast, vectorized computation** using Polars DataFrames
+- **Easy integration** with modern Rust data workflows
+- **Modular design**: Use only the indicators or strategies you need
+- **Extensibility**: Add your own indicators or strategies easily
+
+Whether you are backtesting, researching, or building production trading systems, this crate offers a solid foundation for technical analysis in Rust.
+
+---
 
 ## Features
 
-This library provides functions to calculate various technical indicators from OHLCV (Open, High, Low, Close, Volume) data stored in Polars DataFrames.
+- **Wide range of indicators**: Moving averages, oscillators, volatility, volume, trend, momentum, and more
+- **Strategy modules**: Combine indicators into rule-based trading strategies
+- **Convenience functions**: Add a suite of indicators to your DataFrame in one call
+- **CSV and DataFrame workflows**: Read, process, and save data efficiently
+- **Well-documented and tested**
 
-**Implemented Indicators:**
+### Implemented Indicators
 
-*   **Moving Averages:**
-    *   Simple Moving Average (SMA) - `calculate_sma`
-    *   Exponential Moving Average (EMA) - `calculate_ema`
-    *   Weighted Moving Average (WMA) - `calculate_wma`
-*   **Oscillators:**
-    *   Relative Strength Index (RSI) - `calculate_rsi`
-    *   Moving Average Convergence Divergence (MACD) - `calculate_macd` (returns MACD line and Signal line)
-*   **Volatility:**
-    *   Bollinger Bands (Middle, Upper, Lower) - `calculate_bollinger_bands`
-    *   Bollinger Bands %B - `calculate_bb_b`
-    *   Average True Range (ATR) - `calculate_atr`
-    *   Garman-Klass Volatility - `calculate_gk_volatility`
-*   **Volume:**
-    *   On-Balance Volume (OBV) - `calculate_obv`
-*   **Other Features:**
-    *   Price Returns (`returns`)
-    *   Daily Price Range (`price_range`)
-    *   Lagged Close Prices (`close_lag_5`, `close_lag_15`, `close_lag_30`)
-    *   Rolling Returns (`returns_5min`)
-    *   Rolling Volatility (`volatility_15min`)
-    *   Cyclical Time Features (if a 'time' column exists)
+- **Moving Averages**: SMA, EMA, WMA
+- **Oscillators**: RSI, MACD (line & signal)
+- **Volatility**: Bollinger Bands, %B, ATR, Garman-Klass Volatility
+- **Volume**: On-Balance Volume (OBV)
+- **Other**: Price returns, daily range, lagged prices, rolling returns/volatility, cyclical time features
 
-**Convenience Function:**
+### Planned/Upcoming
+- Chaikin Money Flow (CMF)
+- Average Directional Index (ADX)
+- Rate of Change (ROC)
 
-*   `add_technical_indicators`: A function that takes a mutable DataFrame and adds a standard set of indicators and features (SMA, EMA, RSI, MACD, Bollinger Bands, %B, ATR, GK Volatility, returns, price range, lags, etc.).
-
-**Planned Indicators (Not Yet Implemented):**
-
-*   Chaikin Money Flow (CMF)
-*   Average Directional Index (ADX)
-*   Rate of Change (ROC)
-
-## Advanced Example: Enhanced Minute Strategy
-
-This library includes an advanced intraday trading strategy that combines multiple technical indicators for minute-level OHLCV data. See `examples/enhanced_minute_strategy_example.rs` for a full example, which demonstrates:
-
-- Loading minute-level OHLCV data from CSV
-- Running a multi-indicator strategy with risk management
-- Calculating and printing performance metrics
-- Saving all signals and indicators to a CSV file for further analysis
-
-**Output:**
-
-The example saves a file `enhanced_minute_strategy_results.csv` containing all calculated indicators and trading signals for each row of the input data. This can be used for further analysis, visualization, or research.
+---
 
 ## Installation
 
-Add this library to your `Cargo.toml`:
+Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-technical-indicators = { git = "path/to/your/repo" } # Or version = "x.y.z" if published
-polars = { version = "...", features = ["lazy", "dtype-full"] } # Ensure you have polars
+ta-lib-in-rust = "*" # Or specify a version
+tokio = { version = "1", features = ["full"] } # If using async examples
+polars = { version = "0.46", features = ["lazy", "dtype-full"] }
 ```
 
-## Usage
+- **Minimum Rust version:** 1.70+
+- **Polars compatibility:** 0.46+
 
+---
+
+## Usage Examples
+
+### 1. Calculate a Simple Moving Average (SMA)
 ```rust
 use polars::prelude::*;
-use technical_indicators::{calculate_sma, add_technical_indicators}; // Assuming crate name is technical_indicators
+use ta_lib_in_rust::indicators::moving_averages::calculate_sma;
 
 fn main() -> PolarsResult<()> {
-    // Assume df is a Polars DataFrame with "close", "high", "low", "open", "volume" columns
-    let mut df = DataFrame::new(vec![
-        Series::new("close", &[10.0, 11.0, 12.0, 11.5, 12.5]),
-        // ... other OHLCV columns
-    ])?;
-
-    // Calculate a single indicator
-    let sma_10 = calculate_sma(&df, "close", 10)?;
-    df.with_column(sma_10)?;
-
-    // Or add a suite of indicators
-    df = add_technical_indicators(&mut df)?;
-
+    let close = Series::new("close", &[10.0, 11.0, 12.0, 11.5, 12.5]);
+    let mut df = DataFrame::new(vec![close.into()])?;
+    let sma_3 = calculate_sma(&df, "close", 3)?;
+    df.with_column(sma_3)?;
     println!("{}", df);
     Ok(())
 }
 ```
 
-### Reading Data from CSV
-
-When reading data from CSV files, use the `CsvReadOptions` approach compatible with Polars 0.46.0:
-
+### 2. Combine Multiple Indicators
 ```rust
-// Read a CSV file with headers
+use polars::prelude::*;
+use ta_lib_in_rust::indicators::{
+    moving_averages::calculate_ema,
+    oscillators::calculate_rsi,
+    volatility::calculate_bollinger_bands,
+};
+
+fn main() -> PolarsResult<()> {
+    let close = Series::new("close", &[100.0, 102.0, 104.0, 103.0, 105.0]);
+    let mut df = DataFrame::new(vec![close.clone().into()])?;
+    let ema_3 = calculate_ema(&df, "close", 3)?;
+    let rsi_3 = calculate_rsi(&df, 3, "close")?;
+    let (bb_mid, bb_up, bb_low) = calculate_bollinger_bands(&df, 3, 2.0, "close")?;
+    df = df.with_columns([ema_3, rsi_3, bb_mid, bb_up, bb_low])?;
+    println!("{}", df);
+    Ok(())
+}
+```
+
+### 3. Run a Strategy and Analyze Results
+```rust
+use polars::prelude::*;
+use ta_lib_in_rust::strategy::minute::enhanced_minute_strategy::{
+    run_strategy, calculate_performance, StrategyParams
+};
+
+fn main() -> PolarsResult<()> {
+    let df = CsvReadOptions::default()
+        .with_has_header(true)
+        .try_into_reader_with_file_path(Some("examples/AAPL_minute_ohlcv.csv".into()))?
+        .finish()?;
+    let params = StrategyParams::default();
+    let signals = run_strategy(&df, &params)?;
+    let (
+        final_value, total_return, num_trades, win_rate, max_drawdown, profit_factor, avg_profit_per_trade
+    ) = calculate_performance(
+        df.column("close")?,
+        &signals.buy_signals,
+        &signals.sell_signals,
+        &signals.stop_levels,
+        &signals.target_levels,
+        10000.0,
+        true,
+    );
+    println!("Final Value: ${:.2}, Total Return: {:.2}%", final_value, total_return);
+    Ok(())
+}
+```
+
+### 4. Reading Data from CSV and Saving Results
+```rust
 let df = CsvReadOptions::default()
     .with_has_header(true)
-    .try_into_reader_with_file_path(Some("path/to/data.csv".into()))?
+    .try_into_reader_with_file_path(Some("data.csv".into()))?
     .finish()?;
-
-// If your data has numeric columns as integers but you need them as floats (common for volume)
-let df = df.lazy()
-    .with_columns([
-        col("volume").cast(DataType::Float64),
-    ])
+let mut df = df.lazy()
+    .with_columns([col("volume").cast(DataType::Float64)])
     .collect()?;
+// ... apply indicators or strategies ...
+CsvWriter::new(std::io::BufWriter::new(std::fs::File::create("results.csv")?))
+    .finish(&mut df)?;
 ```
 
-## Running Tests
+---
 
-```bash
-cargo test
-```
+## Advanced Examples
+
+See the [`examples/`](examples/) directory for:
+- **Basic indicator usage** (SMA, EMA, RSI, MACD, Bollinger Bands, etc.)
+- **Strategy backtests** (minute and daily)
+- **CSV workflows** for real-world data
+- **Saving and analyzing results**
+
+---
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests, especially for the planned indicators.
+Contributions are welcome! Please:
+- Open issues for bugs, questions, or feature requests
+- Submit pull requests for new indicators, strategies, or improvements
+- Follow Rust best practices and add tests/docs for new code
+
+---
+
+## Links
+- [Crates.io](https://crates.io/crates/ta-lib-in-rust)
+- [Documentation (docs.rs)](https://docs.rs/ta-lib-in-rust)
+- [GitHub Repository](https://github.com/rustic-ml/ta-lib-in-rust)
 
 ## License
+
+MIT License. See [LICENSE](LICENSE) for details.
