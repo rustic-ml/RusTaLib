@@ -1,7 +1,7 @@
 # Technical Indicators (Rust)
 
 [![crates.io](https://img.shields.io/crates/v/ta-lib-in-rust.svg)](https://crates.io/crates/ta-lib-in-rust) <!-- Placeholder badge -->
-[![docs.rs](https://docs.rs/technical-indicators/badge.svg)](https://docs.rs/ta-lib-in-rust) <!-- Placeholder badge -->
+[![docs.rs](https://docs.rs/ta-lib-in-rust/badge.svg)](https://docs.rs/ta-lib-in-rust) <!-- Placeholder badge -->
 
 A Rust library for calculating common financial technical indicators using the [Polars](https://pola.rs/) DataFrame library.
 
