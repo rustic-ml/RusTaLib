@@ -12,7 +12,7 @@ documentation = "https://docs.rs/ta-lib-in-rust"
 readme = "README.md"
 keywords = ["finance", "technical-analysis", "trading", "indicators", "stocks"]
 # Add relevant categories for discoverability
-categories = ["science::financial", "algorithms", "mathematics"]
+categories = ["algorithms", "mathematics"]
 # Add the 'exclude' field here
 exclude = [
     # Add the folder you want to exclude.
