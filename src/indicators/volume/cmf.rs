@@ -49,7 +49,12 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     // Validate window size
     if window == 0 || window > df.height() {
         return Err(PolarsError::ComputeError(
-            format!("Invalid window size {} for dataset with {} rows", window, df.height()).into(),
+            format!(
+                "Invalid window size {} for dataset with {} rows",
+                window,
+                df.height()
+            )
+            .into(),
         ));
     }
 
@@ -163,13 +168,13 @@ mod tests {
         // Test with a dataset smaller than the window size
         let mut df = create_test_ohlcv_df();
         df = df.slice(0, 5); // Only use first 5 rows
-        
+
         let cmf = calculate_cmf(&df, 10);
         assert!(cmf.is_ok());
-        
+
         let cmf_series = cmf.unwrap();
         assert_eq!(cmf_series.len(), 5);
-        
+
         // All values should be NaN since window > dataset size
         for i in 0..5 {
             assert!(cmf_series.f64().unwrap().get(i).unwrap().is_nan());

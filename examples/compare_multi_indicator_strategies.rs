@@ -7,7 +7,7 @@ use ta_lib_in_rust::strategy::daily::multi_indicator_daily_4;
 fn main() -> Result<(), PolarsError> {
     // Define the tickers to analyze
     let tickers = vec!["AAPL", "GOOGL", "MSFT"];
-    
+
     // Store results for each strategy and ticker
     struct StrategyResult {
         ticker: String,
@@ -19,15 +19,15 @@ fn main() -> Result<(), PolarsError> {
         max_drawdown: f64,
         profit_factor: f64,
     }
-    
+
     let mut all_results: Vec<StrategyResult> = Vec::new();
-    
+
     // Process each ticker
     for ticker in &tickers {
         println!("\n==============================================================");
         println!("ANALYZING {}", ticker);
         println!("==============================================================");
-        
+
         // Load ticker's daily OHLCV data
         let file_path = format!("examples/{}_daily_ohlcv.csv", ticker);
 
@@ -57,14 +57,20 @@ fn main() -> Result<(), PolarsError> {
             .collect()?;
 
         println!("--------------------------------------------------------------");
-        println!("COMPARATIVE ANALYSIS OF MULTI-INDICATOR TRADING STRATEGIES FOR {}", ticker);
+        println!(
+            "COMPARATIVE ANALYSIS OF MULTI-INDICATOR TRADING STRATEGIES FOR {}",
+            ticker
+        );
         println!("--------------------------------------------------------------\n");
 
         // Save reference to close prices for performance calculations
         let close_prices = df.column("close")?;
-        
+
         // Run Strategy 1
-        println!("Running Strategy 1: Standard Multi-Indicator for {}...", ticker);
+        println!(
+            "Running Strategy 1: Standard Multi-Indicator for {}...",
+            ticker
+        );
         let strategy1_params = multi_indicator_daily_1::StrategyParams::default();
 
         println!("Strategy 1 Parameters:");
@@ -106,7 +112,7 @@ fn main() -> Result<(), PolarsError> {
         println!("- Maximum Drawdown: {:.2}%", max_drawdown1 * 100.0);
         println!("- Profit Factor: {:.2}", profit_factor1);
         println!();
-        
+
         // Save strategy 1 results
         all_results.push(StrategyResult {
             ticker: ticker.to_string(),
@@ -120,7 +126,10 @@ fn main() -> Result<(), PolarsError> {
         });
 
         // Run Strategy 2
-        println!("Running Strategy 2: Volatility-Focused Multi-Indicator for {}...", ticker);
+        println!(
+            "Running Strategy 2: Volatility-Focused Multi-Indicator for {}...",
+            ticker
+        );
         let strategy2_params = multi_indicator_daily_2::StrategyParams::default();
 
         println!("Strategy 2 Parameters:");
@@ -165,7 +174,7 @@ fn main() -> Result<(), PolarsError> {
         println!("- Maximum Drawdown: {:.2}%", max_drawdown2 * 100.0);
         println!("- Profit Factor: {:.2}", profit_factor2);
         println!();
-        
+
         // Save strategy 2 results
         all_results.push(StrategyResult {
             ticker: ticker.to_string(),
@@ -240,7 +249,7 @@ fn main() -> Result<(), PolarsError> {
         println!("- Maximum Drawdown: {:.2}%", max_drawdown3 * 100.0);
         println!("- Profit Factor: {:.2}", profit_factor3);
         println!();
-        
+
         // Save strategy 3 results
         all_results.push(StrategyResult {
             ticker: ticker.to_string(),
@@ -254,7 +263,10 @@ fn main() -> Result<(), PolarsError> {
         });
 
         // Run Strategy 4
-        println!("Running Strategy 4: Hybrid Adaptive Strategy for {}...", ticker);
+        println!(
+            "Running Strategy 4: Hybrid Adaptive Strategy for {}...",
+            ticker
+        );
         let strategy4_params = multi_indicator_daily_4::StrategyParams::default();
 
         println!("Strategy 4 Parameters:");
@@ -328,7 +340,7 @@ fn main() -> Result<(), PolarsError> {
         println!("- Maximum Drawdown: {:.2}%", max_drawdown4 * 100.0);
         println!("- Profit Factor: {:.2}", profit_factor4);
         println!();
-        
+
         // Save strategy 4 results
         all_results.push(StrategyResult {
             ticker: ticker.to_string(),
@@ -464,31 +476,34 @@ fn main() -> Result<(), PolarsError> {
             );
         }
     }
-    
+
     // Cross-ticker comparison for each strategy
     println!("\n==============================================================");
     println!("CROSS-TICKER COMPARISON BY STRATEGY");
     println!("==============================================================");
-    
+
     // Group results by strategy
     let strategy_names = vec![
         "Standard Multi-Indicator",
         "Volatility-Focused Multi-Indicator",
         "Adaptive Trend-Filtered",
-        "Hybrid Adaptive Strategy"
+        "Hybrid Adaptive Strategy",
     ];
-    
+
     for strategy_name in &strategy_names {
         println!("\nStrategy: {}", strategy_name);
         println!("--------------------------");
-        println!("{:<6} {:<15} {:<10} {:<10} {:<10} {:<10}",
-            "Ticker", "Return (%)", "Final Value", "Trades", "Win Rate", "Max DD%");
-        
+        println!(
+            "{:<6} {:<15} {:<10} {:<10} {:<10} {:<10}",
+            "Ticker", "Return (%)", "Final Value", "Trades", "Win Rate", "Max DD%"
+        );
+
         // Filter results for this strategy
-        let strategy_results: Vec<&StrategyResult> = all_results.iter()
+        let strategy_results: Vec<&StrategyResult> = all_results
+            .iter()
             .filter(|r| r.strategy_name == *strategy_name)
             .collect();
-            
+
         // Print results for each ticker
         for result in &strategy_results {
             println!(
@@ -501,35 +516,44 @@ fn main() -> Result<(), PolarsError> {
                 result.max_drawdown * 100.0
             );
         }
-        
+
         // Find best performing ticker for this strategy
         if !strategy_results.is_empty() {
-            let best_ticker = strategy_results.iter()
+            let best_ticker = strategy_results
+                .iter()
                 .max_by(|a, b| a.total_return.partial_cmp(&b.total_return).unwrap())
                 .unwrap();
-                
-            println!("\n{} performed best on {} with a {:.2}% return.", 
-                strategy_name, best_ticker.ticker, best_ticker.total_return);
+
+            println!(
+                "\n{} performed best on {} with a {:.2}% return.",
+                strategy_name, best_ticker.ticker, best_ticker.total_return
+            );
         }
     }
-    
+
     // Overall best combination
     println!("\n==============================================================");
     println!("OVERALL BEST STRATEGY-TICKER COMBINATION");
     println!("==============================================================");
-    
+
     if !all_results.is_empty() {
-        let best_overall = all_results.iter()
+        let best_overall = all_results
+            .iter()
             .max_by(|a, b| a.total_return.partial_cmp(&b.total_return).unwrap())
             .unwrap();
-            
-        println!("The best overall performance was {} on {} with a {:.2}% return.",
-            best_overall.strategy_name, best_overall.ticker, best_overall.total_return);
+
+        println!(
+            "The best overall performance was {} on {} with a {:.2}% return.",
+            best_overall.strategy_name, best_overall.ticker, best_overall.total_return
+        );
         println!("Performance details:");
         println!("- Final Value: ${:.2}", best_overall.final_value);
         println!("- Number of Trades: {}", best_overall.num_trades);
         println!("- Win Rate: {:.2}%", best_overall.win_rate);
-        println!("- Maximum Drawdown: {:.2}%", best_overall.max_drawdown * 100.0);
+        println!(
+            "- Maximum Drawdown: {:.2}%",
+            best_overall.max_drawdown * 100.0
+        );
         println!("- Profit Factor: {:.2}", best_overall.profit_factor);
     }
 

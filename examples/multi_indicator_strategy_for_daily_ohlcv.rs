@@ -9,7 +9,7 @@ use ta_lib_in_rust::strategy::daily::multi_indicator_daily_1::{
 fn main() -> Result<(), PolarsError> {
     // Define the tickers to analyze
     let tickers = vec!["AAPL", "GOOGL", "MSFT"];
-    
+
     // Store results for each ticker
     let mut ticker_results = Vec::new();
 
@@ -18,7 +18,7 @@ fn main() -> Result<(), PolarsError> {
         println!("\n--------------------------------------------------------------");
         println!("ANALYZING {}", ticker);
         println!("--------------------------------------------------------------");
-        
+
         // Load ticker's daily OHLCV data
         let file_path = format!("examples/csv/{}_daily_ohlcv.csv", ticker);
 
@@ -27,16 +27,17 @@ fn main() -> Result<(), PolarsError> {
             .with_has_header(true)
             .try_into_reader_with_file_path(Some(Path::new(&file_path).to_path_buf()))?
             .finish()?;
-        
+
         // Create a DataFrame with lowercase column names expected by the indicators
-        let lowercase_df = df.lazy()
+        let lowercase_df = df
+            .lazy()
             .select([
                 col("Open").alias("open"),
                 col("High").alias("high"),
                 col("Low").alias("low"),
                 col("Close").alias("close"),
                 col("Volume").alias("volume"),
-                col("Timestamp").alias("date")
+                col("Timestamp").alias("date"),
             ])
             .collect()?;
 
@@ -74,7 +75,10 @@ fn main() -> Result<(), PolarsError> {
         let max_combinations = 50;
         let start_capital = 10000.0;
 
-        println!("Running backtests with different parameter combinations for {}...", ticker);
+        println!(
+            "Running backtests with different parameter combinations for {}...",
+            ticker
+        );
 
         for sma_short in &sma_short_periods {
             for sma_long in &sma_long_periods {
@@ -132,8 +136,9 @@ fn main() -> Result<(), PolarsError> {
                                                         match run_strategy(&lowercase_df, &params) {
                                                             Ok(signals) => {
                                                                 // Calculate performance metrics
-                                                                let close_series =
-                                                                    lowercase_df.column("close")?.clone();
+                                                                let close_series = lowercase_df
+                                                                    .column("close")?
+                                                                    .clone();
 
                                                                 let (
                                                                     final_value,
@@ -218,7 +223,7 @@ fn main() -> Result<(), PolarsError> {
         // Save the best result for this ticker
         if let Some(best) = &best_params {
             ticker_results.push(best.clone());
-            
+
             // Show the best parameters in detail
             println!("\nBest Parameter Combination for {}:", ticker);
             println!("--------------------------");
@@ -245,14 +250,16 @@ fn main() -> Result<(), PolarsError> {
             println!("Profit Factor: {:.2}", best.profit_factor);
         }
     }
-    
+
     // Compare results across tickers
     println!("\n--------------------------------------------------------------");
     println!("CROSS-TICKER COMPARISON");
     println!("--------------------------------------------------------------");
-    println!("{:<6} {:<15} {:<10} {:<10} {:<10} {:<10}",
-        "Ticker", "Return (%)", "Final Value", "Trades", "Win Rate", "Max DD%");
-    
+    println!(
+        "{:<6} {:<15} {:<10} {:<10} {:<10} {:<10}",
+        "Ticker", "Return (%)", "Final Value", "Trades", "Win Rate", "Max DD%"
+    );
+
     for result in &ticker_results {
         println!(
             "{:<6} {:<15.2} {:<10.2} {:<10} {:<10.2}% {:<10.2}%",
@@ -264,15 +271,18 @@ fn main() -> Result<(), PolarsError> {
             result.max_drawdown * 100.0
         );
     }
-    
+
     // Find best performing ticker
     if !ticker_results.is_empty() {
-        let best_ticker = ticker_results.iter()
+        let best_ticker = ticker_results
+            .iter()
             .max_by(|a, b| a.total_return.partial_cmp(&b.total_return).unwrap())
             .unwrap();
-            
-        println!("\n{} had the best performance with a {:.2}% return.", 
-            best_ticker.ticker, best_ticker.total_return);
+
+        println!(
+            "\n{} had the best performance with a {:.2}% return.",
+            best_ticker.ticker, best_ticker.total_return
+        );
     }
 
     Ok(())
