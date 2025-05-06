@@ -34,11 +34,10 @@ Whether you are backtesting, researching, or building production trading systems
 - **Moving Averages**: SMA, EMA, WMA
 - **Oscillators**: RSI, MACD (line & signal)
 - **Volatility**: Bollinger Bands, %B, ATR, Garman-Klass Volatility
-- **Volume**: On-Balance Volume (OBV)
+- **Volume**: On-Balance Volume (OBV), Chaikin Money Flow (CMF)
 - **Other**: Price returns, daily range, lagged prices, rolling returns/volatility, cyclical time features
 
 ### Planned/Upcoming
-- Chaikin Money Flow (CMF)
 - Average Directional Index (ADX)
 - Rate of Change (ROC)
 
@@ -110,6 +109,19 @@ fn main() -> PolarsResult<()> {
         .with_has_header(true)
         .try_into_reader_with_file_path(Some("examples/AAPL_minute_ohlcv.csv".into()))?
         .finish()?;
+    
+    // Note: This library expects lowercase column names (open, high, low, close, volume)
+    // If your CSV has uppercase names, you need to rename them:
+    let df = df.lazy()
+        .select([
+            col("Open").alias("open"),
+            col("High").alias("high"),
+            col("Low").alias("low"),
+            col("Close").alias("close"),
+            col("Volume").cast(DataType::Float64).alias("volume"),
+        ])
+        .collect()?;
+        
     let params = StrategyParams::default();
     let signals = run_strategy(&df, &params)?;
     let (
@@ -134,9 +146,20 @@ let df = CsvReadOptions::default()
     .with_has_header(true)
     .try_into_reader_with_file_path(Some("data.csv".into()))?
     .finish()?;
+
+// Important: Ensure column names are lowercase for compatibility with indicators
 let mut df = df.lazy()
-    .with_columns([col("volume").cast(DataType::Float64)])
+    .select([
+        col("Symbol").alias("symbol"),
+        col("Timestamp").alias("timestamp"),
+        col("Open").alias("open"),
+        col("High").alias("high"),
+        col("Low").alias("low"),
+        col("Close").alias("close"),
+        col("Volume").cast(DataType::Float64).alias("volume"),
+    ])
     .collect()?;
+
 // ... apply indicators or strategies ...
 CsvWriter::new(std::io::BufWriter::new(std::fs::File::create("results.csv")?))
     .finish(&mut df)?;
@@ -151,6 +174,14 @@ See the [`examples/`](examples/) directory for:
 - **Strategy backtests** (minute and daily)
 - **CSV workflows** for real-world data
 - **Saving and analyzing results**
+
+## Important Notes
+
+### Column Name Sensitivity
+This library expects lowercase column names (`open`, `high`, `low`, `close`, `volume`) in DataFrames. When working with CSVs that might have different case formats (e.g., `Open`, `High`, etc.), make sure to rename the columns using Polars' selection and aliasing capabilities as shown in the examples above.
+
+### Working with Multiple Stock Data Files
+The examples directory contains sample code for running strategies on multiple stocks (AAPL, GOOGL, MSFT). You can use these as templates for your own multi-asset analysis.
 
 ---
 

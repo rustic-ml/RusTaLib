@@ -46,6 +46,13 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
         ));
     }
 
+    // Validate window size
+    if window == 0 || window > df.height() {
+        return Err(PolarsError::ComputeError(
+            format!("Invalid window size {} for dataset with {} rows", window, df.height()).into(),
+        ));
+    }
+
     // Extract the required columns
     let high = df.column("high")?.f64()?;
     let low = df.column("low")?.f64()?;
@@ -85,18 +92,23 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     let mut cmf_values = Vec::with_capacity(df.height());
 
     // Fill in NaN values for the initial window
-    for _ in 0..window - 1 {
+    for _ in 0..window.min(df.height()) {
         cmf_values.push(f64::NAN);
     }
 
+    // Make sure we have enough data to calculate CMF
+    if df.height() <= window {
+        return Ok(Series::new(format!("cmf_{}", window).into(), cmf_values));
+    }
+
     // Calculate CMF for each period after the initial window
-    for i in window - 1..df.height() {
+    for i in window..df.height() {
         let mut money_flow_volume_sum = 0.0;
         let mut volume_sum = 0.0;
         let mut has_nan = false;
 
         // Sum up money flow volumes and volumes over the window
-        for j in (i - window + 1)..=i {
+        for j in i - window..i {
             let mfv = money_flow_volumes[j];
             let vol = volume.get(j).unwrap_or(f64::NAN);
 
@@ -143,6 +155,24 @@ mod tests {
         // CMF for the first (window-1) periods should be NaN
         for i in 0..19 {
             assert!(cmf.f64().unwrap().get(i).unwrap().is_nan());
+        }
+    }
+
+    #[test]
+    fn test_cmf_small_dataset() {
+        // Test with a dataset smaller than the window size
+        let mut df = create_test_ohlcv_df();
+        df = df.slice(0, 5); // Only use first 5 rows
+        
+        let cmf = calculate_cmf(&df, 10);
+        assert!(cmf.is_ok());
+        
+        let cmf_series = cmf.unwrap();
+        assert_eq!(cmf_series.len(), 5);
+        
+        // All values should be NaN since window > dataset size
+        for i in 0..5 {
+            assert!(cmf_series.f64().unwrap().get(i).unwrap().is_nan());
         }
     }
 }

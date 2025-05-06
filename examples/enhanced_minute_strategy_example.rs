@@ -25,10 +25,19 @@ fn main() -> Result<(), PolarsError> {
     println!("First few rows:");
     println!("{}", df.head(Some(5)));
 
-    // Cast volume column to Float64 to match strategy expectations
+    // Create a DataFrame with lowercase column names expected by the indicators
     let df = df
         .lazy()
-        .with_columns([col("volume").cast(DataType::Float64)])
+        .select([
+            col("Symbol").alias("symbol"),
+            col("Timestamp").alias("timestamp").alias("date"), // Also alias as date for later use
+            col("Open").alias("open"),
+            col("High").alias("high"),
+            col("Low").alias("low"),
+            col("Close").alias("close"),
+            col("Volume").cast(DataType::Float64).alias("volume"),
+            col("VWAP").alias("vwap"),
+        ])
         .collect()?;
 
     // Create strategy parameters with customized settings for intraday trading

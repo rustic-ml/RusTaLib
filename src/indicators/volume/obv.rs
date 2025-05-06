@@ -35,8 +35,10 @@ pub fn calculate_obv(df: &DataFrame) -> PolarsResult<Series> {
             obv.push(obv[i - 1] + curr_volume);
         } else if curr_close < prev_close_val {
             obv.push(obv[i - 1] - curr_volume);
+        } else {
+            // If prices are equal, OBV doesn't change
+            obv.push(obv[i - 1]);
         }
-        // If equal, no change
     }
 
     Ok(Series::new("obv".into(), obv))
