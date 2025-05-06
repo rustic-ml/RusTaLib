@@ -242,7 +242,7 @@ pub fn run_strategy(
     // Calculate average volume for comparison
     let avg_volume: f64 = volume
         .iter()
-        .filter_map(|v| v)
+        .flatten()
         .take(100) // Use first 100 values or fewer
         .sum::<f64>()
         / 100.0;
