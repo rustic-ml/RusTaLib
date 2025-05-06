@@ -1,5 +1,7 @@
 # Technical Indicators (Rust)
 
+![Technical Indicators Library Icon](images.png)
+
 [![crates.io](https://img.shields.io/crates/v/ta-lib-in-rust.svg)](https://crates.io/crates/ta-lib-in-rust)
 [![docs.rs](https://docs.rs/ta-lib-in-rust/badge.svg)](https://docs.rs/ta-lib-in-rust)
 

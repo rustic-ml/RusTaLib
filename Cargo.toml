@@ -22,6 +22,7 @@ exclude = [
 
     ".gitignore",
     "Cargo.lock",
+    "images.png",
 
     # You can add more patterns:
     # "another_folder/",
