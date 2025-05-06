@@ -515,7 +515,7 @@ pub fn calculate_performance(
         let price = close.get(i).unwrap_or(0.0);
         let buy_signal = buy_signals[i];
         let sell_signal = sell_signals[i];
-        let position_size = position_sizes[i].min(1.0).max(0.1); // Ensure position size is between 0.1 and 1.0
+        let position_size = position_sizes[i].clamp(0.1, 1.0); // Ensure position size is between 0.1 and 1.0
 
         if buy_signal == 1 {
             // Use position sizing

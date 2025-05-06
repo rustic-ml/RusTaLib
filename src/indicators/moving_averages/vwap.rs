@@ -48,7 +48,7 @@ pub fn calculate_vwap(df: &DataFrame, lookback: usize) -> PolarsResult<Series> {
 
     // Calculate price * volume (cumulative money flow)
     let mut price_volume = Vec::with_capacity(df.height());
-    for i in 0..df.height() {
+    for (i, _) in typical_prices.iter().enumerate().take(df.height()) {
         price_volume.push(typical_prices[i] * volume.get(i).unwrap_or(0.0));
     }
 
@@ -60,8 +60,8 @@ pub fn calculate_vwap(df: &DataFrame, lookback: usize) -> PolarsResult<Series> {
         let mut cumulative_pv = 0.0;
         let mut cumulative_volume = 0.0;
 
-        for i in 0..df.height() {
-            cumulative_pv += price_volume[i];
+        for (i, &pv) in price_volume.iter().enumerate().take(df.height()) {
+            cumulative_pv += pv;
             cumulative_volume += volume.get(i).unwrap_or(0.0);
 
             if cumulative_volume > 0.0 {
@@ -78,8 +78,8 @@ pub fn calculate_vwap(df: &DataFrame, lookback: usize) -> PolarsResult<Series> {
             let mut window_pv = 0.0;
             let mut window_volume = 0.0;
 
-            for j in start_idx..=i {
-                window_pv += price_volume[j];
+            for (j, &pv) in price_volume.iter().enumerate().take(i + 1).skip(start_idx) {
+                window_pv += pv;
                 window_volume += volume.get(j).unwrap_or(0.0);
             }
 

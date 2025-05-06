@@ -51,15 +51,15 @@ pub fn calculate_atr(df: &DataFrame, window: usize) -> PolarsResult<Series> {
 
     // Initialize ATR with simple average of first window TR values
     let mut atr = 0.0;
-    for i in 0..window {
-        atr += tr_values[i];
+    for &tr in tr_values.iter().take(window) {
+        atr += tr;
     }
     atr /= window as f64;
     atr_values.push(atr);
 
     // Apply Wilder's smoothing formula: ATR(t) = ((window-1) * ATR(t-1) + TR(t)) / window
-    for i in window..tr_values.len() {
-        atr = ((window as f64 - 1.0) * atr + tr_values[i]) / window as f64;
+    for &tr in tr_values.iter().skip(window) {
+        atr = ((window as f64 - 1.0) * atr + tr) / window as f64;
         atr_values.push(atr);
     }
 

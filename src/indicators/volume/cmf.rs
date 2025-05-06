@@ -66,7 +66,7 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
 
     // Calculate Money Flow Multiplier
     let mut money_flow_multipliers = Vec::with_capacity(df.height());
-    for i in 0..df.height() {
+    for (i, _) in high.iter().enumerate().take(df.height()) {
         let high_val = high.get(i).unwrap_or(f64::NAN);
         let low_val = low.get(i).unwrap_or(f64::NAN);
         let close_val = close.get(i).unwrap_or(f64::NAN);
@@ -113,8 +113,7 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
         let mut has_nan = false;
 
         // Sum up money flow volumes and volumes over the window
-        for j in i - window..i {
-            let mfv = money_flow_volumes[j];
+        for (j, &mfv) in money_flow_volumes.iter().enumerate().take(i).skip(i - window) {
             let vol = volume.get(j).unwrap_or(f64::NAN);
 
             if mfv.is_nan() || vol.is_nan() {

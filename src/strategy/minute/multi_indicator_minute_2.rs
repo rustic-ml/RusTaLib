@@ -354,7 +354,7 @@ pub fn run_strategy(
             // Smaller position for higher volatility
             let base_position = 1.0 / (params.atr_position_size_factor * atr_val / price);
             // Clamp between 0.1 and 1.0
-            base_position.max(0.1).min(1.0)
+            base_position.clamp(0.1, 1.0)
         } else {
             1.0 // Full position if not using ATR sizing
         };

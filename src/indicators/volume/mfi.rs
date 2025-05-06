@@ -59,7 +59,7 @@ pub fn calculate_mfi(df: &DataFrame, window: usize) -> PolarsResult<Series> {
 
     // Calculate the typical price: (high + low + close) / 3
     let mut typical_prices = Vec::with_capacity(df.height());
-    for i in 0..df.height() {
+    for (i, _) in high.iter().enumerate().take(df.height()) {
         let high_val = high.get(i).unwrap_or(f64::NAN);
         let low_val = low.get(i).unwrap_or(f64::NAN);
         let close_val = close.get(i).unwrap_or(f64::NAN);

@@ -102,7 +102,7 @@ pub fn calculate_stochastic(
     let mut k_values = Vec::with_capacity(df.height());
 
     // Fill initial values with NaN
-    for i in 0..k_period + slowing - 2 {
+    for _i in 0..k_period + slowing - 2 {
         k_values.push(f64::NAN);
     }
 
@@ -133,7 +133,7 @@ pub fn calculate_stochastic(
     let mut d_values = Vec::with_capacity(df.height());
 
     // Fill initial values with NaN
-    for i in 0..k_period + slowing + d_period - 3 {
+    for _i in 0..k_period + slowing + d_period - 3 {
         d_values.push(f64::NAN);
     }
 
