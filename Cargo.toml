@@ -23,6 +23,7 @@ exclude = [
     ".gitignore",
     "Cargo.lock",
     "images_processed.png",
+    "tag_version.sh",
 
     # You can add more patterns:
     # "another_folder/",

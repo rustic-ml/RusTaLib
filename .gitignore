@@ -33,3 +33,7 @@ Thumbs.db
 # will contain source code downloaded from crates.io and other sources
 target/
 Cargo.lock
+
+# Tag version #
+##############
+tag_version.sh
