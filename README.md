@@ -1,11 +1,11 @@
-# Technical Indicators (Rust)
+# RusTalib, the Crustacean Financial Analyst 🦀
 
-![Technical Indicators Library Icon](images_processed.png)
+Meet **Rustalib**, your steadfast crustacean companion for navigating the currents of financial markets! This comprehensive Rust library, `ta-lib-in-rust`, provides a powerful toolkit for calculating technical indicators and building trading strategies, all powered by the high-performance [Polars](https://pola.rs/) DataFrame library.
 
-[![crates.io](https://img.shields.io/crates/v/ta-lib-in-rust.svg)](https://crates.io/crates/ta-lib-in-rust)
+Whether you're charting, backtesting, or building live trading systems, Rustalib is here to help you process market data with speed and precision.
+
+![Technical Indicators Library Icon](images_processed.png) [![crates.io](https://img.shields.io/crates/v/ta-lib-in-rust.svg)](https://crates.io/crates/ta-lib-in-rust)
 [![docs.rs](https://docs.rs/ta-lib-in-rust/badge.svg)](https://docs.rs/ta-lib-in-rust)
-
-A comprehensive Rust library for calculating financial technical indicators and building trading strategies, leveraging the [Polars](https://pola.rs/) DataFrame library for high-performance data analysis.
 
 ---
 
