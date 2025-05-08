@@ -1,12 +1,14 @@
 //! # Trading Strategies
 //!
-//! This module provides a collection of trading strategies that combine multiple technical indicators
-//! for making trading decisions.
+//! This module provides specialized trading strategies organized by asset class.
+//! Each asset class has its own set of optimized strategies that leverage 
+//! asset-specific indicators and characteristics.
 //!
-//! ## Available Strategy Types
+//! ## Asset-Specific Strategy Modules
 //!
-//! - [`daily`](daily/index.html): Strategies optimized for daily timeframe analysis
-//! - [`minute`](minute/index.html): Strategies optimized for minute timeframe (intraday) analysis
+//! - [`stock`](stock/index.html): Strategies optimized for stock/equity markets
+//! - [`options`](options/index.html): Strategies optimized for options trading
+//! - [`crypto`](crypto/index.html): Strategies optimized for cryptocurrency markets
 //!
 //! Each strategy module typically provides:
 //!
@@ -18,22 +20,22 @@
 //!
 //! ```rust,no_run
 //! use polars::prelude::*;
-//! use ta_lib_in_rust::strategy::{run_strategy_1, StrategyParams1};
+//! use ta_lib_in_rust::strategy::stock::trend_following::{run_strategy, StrategyParams};
 //!
 //! fn main() -> Result<(), PolarsError> {
 //!     // Create or load a DataFrame with OHLCV data
 //!     let df = DataFrame::default(); // Replace with actual data loading
 //!     
-//!     // Use default parameters for strategy 1
-//!     let params = StrategyParams1::default();
+//!     // Configure strategy parameters
+//!     let params = StrategyParams::default();
 //!     
 //!     // Run the strategy
-//!     let signals = run_strategy_1(&df, &params)?;
+//!     let signals = run_strategy(&df, &params)?;
 //!     
 //!     // Analyze the signals
 //!     let close_prices = df.column("close")?;
 //!     let (final_value, return_pct, num_trades, win_rate, max_drawdown, profit_factor) =
-//!         ta_lib_in_rust::strategy::daily::multi_indicator_daily_1::calculate_performance(
+//!         ta_lib_in_rust::strategy::stock::trend_following::calculate_performance(
 //!             close_prices,
 //!             &signals.buy_signals,
 //!             &signals.sell_signals,
@@ -47,26 +49,25 @@
 //! }
 //! ```
 
-pub mod daily;
-pub mod minute;
+// Asset-specific strategy modules
+pub mod stock;
+pub mod options;
+pub mod crypto;
 
-// Re-export daily strategies
-pub use daily::multi_indicator_daily_1::{
-    run_strategy as run_strategy_1, StrategyParams as StrategyParams1,
-};
-pub use daily::multi_indicator_daily_2::{
-    run_strategy as run_strategy_222, StrategyParams as StrategyParams222,
-};
-pub use daily::multi_indicator_daily_3::{
-    run_strategy as run_strategy_3, StrategyParams as StrategyParams3,
-};
-pub use daily::multi_indicator_daily_4::{
-    run_strategy as run_strategy_4, StrategyParams as StrategyParams4,
-};
+// Re-export commonly used stock strategies
+pub use stock::trend_following;
+pub use stock::mean_reversion;
+pub use stock::breakout;
+pub use stock::volume_based;
 
-// Re-export minute strategies with shorter names for direct access
-pub use minute::enhanced_minute_strategy as enhanced_minute;
-pub use minute::multi_indicator_minute_1 as minute_1;
-pub use minute::multi_indicator_minute_2 as minute_2;
-pub use minute::multi_indicator_minute_3 as minute_3;
-pub use minute::multi_indicator_minute_4 as minute_4;
+// Re-export commonly used options strategies
+pub use options::vertical_spreads;
+pub use options::iron_condor;
+pub use options::volatility_strategies;
+pub use options::delta_neutral;
+
+// Re-export commonly used crypto strategies
+pub use crypto::momentum;
+pub use crypto::market_neutral;
+pub use crypto::arbitrage;
+pub use crypto::grid_trading;

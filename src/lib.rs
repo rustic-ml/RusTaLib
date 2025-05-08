@@ -100,7 +100,7 @@
 //!
 //! ```rust
 //! use polars::prelude::*;
-//! use ta_lib_in_rust::strategy::daily::multi_indicator_daily_1::{
+//! use ta_lib_in_rust::strategy::stock::trend_following::{
 //!     run_strategy, calculate_performance, StrategyParams
 //! };
 //!
@@ -162,57 +162,43 @@
 //!
 //! ```rust
 //! use polars::prelude::*;
-//! use ta_lib_in_rust::strategy::minute::{
-//!     multi_indicator_minute_1,
-//!     multi_indicator_minute_2,
-//!     multi_indicator_minute_3
+//! use ta_lib_in_rust::strategy::{
+//!     stock::trend_following as strategy1,
+//!     stock::mean_reversion as strategy2
 //! };
 //!
 //! fn main() -> PolarsResult<()> {
-//!     // Load minute data from CSV
+//!     // Load data from CSV
 //!     let mut df = CsvReadOptions::default()
 //!         .with_has_header(true)
-//!         .try_into_reader_with_file_path(Some("path/to/minute_data.csv".into()))?
+//!         .try_into_reader_with_file_path(Some("path/to/ohlcv_data.csv".into()))?
 //!         .finish()?;
 //!
-//!     // Cast volume to float if needed
-//!     df = df.lazy()
-//!         .with_columns([
-//!             col("volume").cast(DataType::Float64),
-//!         ])
-//!         .collect()?;
-//!
 //!     // Initialize strategies with default parameters
-//!     let params1 = multi_indicator_minute_1::StrategyParams::default();
-//!     let params2 = multi_indicator_minute_2::StrategyParams::default();
-//!     let params3 = multi_indicator_minute_3::StrategyParams::default();
+//!     let params1 = strategy1::StrategyParams::default();
+//!     let params2 = strategy2::StrategyParams::default();
 //!
 //!     // Run strategies
-//!     let signals1 = multi_indicator_minute_1::run_strategy(&df, &params1)?;
-//!     let signals2 = multi_indicator_minute_2::run_strategy(&df, &params2)?;
-//!     let signals3 = multi_indicator_minute_3::run_strategy(&df, &params3)?;
+//!     let signals1 = strategy1::run_strategy(&df, &params1)?;
+//!     let signals2 = strategy2::run_strategy(&df, &params2)?;
 //!
 //!     // Calculate performance for each strategy
 //!     let close_prices = df.column("close")?;
 //!
-//!     let (final_value1, return1, trades1, win_rate1, drawdown1, _, _) =
-//!         multi_indicator_minute_1::calculate_performance(
+//!     let (final_value1, return1, trades1, win_rate1, drawdown1, profit_factor1) =
+//!         strategy1::calculate_performance(
 //!             close_prices,
 //!             &signals1.buy_signals,
 //!             &signals1.sell_signals,
-//!             10000.0,
-//!             true
+//!             10000.0
 //!         );
 //!
-//!     let (final_value2, return2, trades2, win_rate2, drawdown2, _, _) =
-//!         multi_indicator_minute_2::calculate_performance(
+//!     let (final_value2, return2, trades2, win_rate2, drawdown2, profit_factor2) =
+//!         strategy2::calculate_performance(
 //!             close_prices,
 //!             &signals2.buy_signals,
 //!             &signals2.sell_signals,
-//!             &signals2.position_sizes,
-//!             10000.0,
-//!             true,
-//!             None
+//!             10000.0
 //!         );
 //!
 //!     // Compare results
@@ -276,7 +262,7 @@ pub fn add(left: u64, right: u64) -> u64 {
 pub enum FeatureSelection<'a> {
     Indicators,
     Strategy {
-        /// Name of the strategy module (e.g., "daily_1", "minute_2", etc.)
+        /// Name of the strategy module (e.g., "stock::trend_following", "crypto::momentum", etc.)
         strategy_name: &'a str,
         /// Optional parameters for the strategy (if needed)
         params: Option<Box<dyn std::any::Any>>,
@@ -299,15 +285,15 @@ pub fn select_features(
             indicators::add_technical_indicators(df)
         }
         FeatureSelection::Strategy { strategy_name, params } => {
-            // Example: match on strategy_name and call the appropriate strategy
+            // Match on strategy_name and call the appropriate strategy
             match strategy_name {
-                "daily_1" => {
-                    use crate::strategy::daily::multi_indicator_daily_1;
+                "stock::trend_following" => {
+                    use crate::strategy::stock::trend_following;
                     let params = params
-                        .and_then(|p| p.downcast::<multi_indicator_daily_1::StrategyParams>().ok())
+                        .and_then(|p| p.downcast::<trend_following::StrategyParams>().ok())
                         .map(|b| *b)
-                        .unwrap_or_else(multi_indicator_daily_1::StrategyParams::default);
-                    let signals = multi_indicator_daily_1::run_strategy(df, &params)
+                        .unwrap_or_else(trend_following::StrategyParams::default);
+                    let signals = trend_following::run_strategy(df, &params)
                         .map_err(|e| polars::prelude::PolarsError::ComputeError(format!("Strategy error: {e}").into()))?;
                     // Return a DataFrame with signals (user can extract more as needed)
                     let mut result = df.clone();
@@ -315,8 +301,35 @@ pub fn select_features(
                     result.with_column(Series::new("sell_signals".into(), &signals.sell_signals[..]))?;
                     Ok(result)
                 }
+                "crypto::momentum" => {
+                    use crate::strategy::crypto::momentum;
+                    let params = params
+                        .and_then(|p| p.downcast::<momentum::StrategyParams>().ok())
+                        .map(|b| *b)
+                        .unwrap_or_else(momentum::StrategyParams::default);
+                    let signals = momentum::run_strategy(df, None, &params)
+                        .map_err(|e| polars::prelude::PolarsError::ComputeError(format!("Strategy error: {e}").into()))?;
+                    // Return a DataFrame with signals (user can extract more as needed)
+                    let mut result = df.clone();
+                    result.with_column(Series::new("buy_signals".into(), &signals.buy_signals[..]))?;
+                    result.with_column(Series::new("sell_signals".into(), &signals.sell_signals[..]))?;
+                    result.with_column(Series::new("position_size".into(), &signals.position_sizes[..]))?;
+                    Ok(result)
+                }
+                "options::vertical_spreads" => {
+                    use crate::strategy::options::vertical_spreads;
+                    let params = params
+                        .and_then(|p| p.downcast::<vertical_spreads::StrategyParams>().ok())
+                        .map(|b| *b)
+                        .unwrap_or_else(vertical_spreads::StrategyParams::default);
+                    // For options strategies, we need an options chain DataFrame which we don't have
+                    // So return a placeholder error for now
+                    Err(polars::prelude::PolarsError::ComputeError(
+                        "Options strategies require an options chain DataFrame".into()
+                    ))
+                }
                 // Add more strategies as needed
-                _ => Err(polars::prelude::PolarsError::ComputeError("Unknown strategy name".into())),
+                _ => Err(polars::prelude::PolarsError::ComputeError(format!("Unknown strategy name: {}", strategy_name).into())),
             }
         }
         FeatureSelection::All { strategy_name, params } => {
