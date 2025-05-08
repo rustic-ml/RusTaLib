@@ -43,6 +43,47 @@ Whether you are backtesting, researching, or building production trading systems
 
 ---
 
+## Feature Selection
+
+This crate supports feature selection, allowing you to include only the parts you need:
+
+### Types of Features
+- **indicators**: Only include technical indicator calculations
+- **strategies**: Only include trading strategies
+- **all**: Include both indicators and strategies (default)
+
+### How to Choose Features in Cargo.toml
+
+You can enable features in your `Cargo.toml` like this:
+
+```toml
+[dependencies]
+ta-lib-in-rust = { version = "x.y.z", features = ["strategies"] } # Only strategies
+ta-lib-in-rust = { version = "x.y.z", features = ["indicators"] } # Only indicators
+ta-lib-in-rust = { version = "x.y.z", features = ["all"] }        # Everything (default)
+```
+
+If you omit the `features` key, the default is `all`.
+
+### Programmatic Feature Selection
+
+You can also select features at runtime using the `FeatureSelection` enum and `select_features` function:
+
+```rust
+use ta_lib_in_rust::{FeatureSelection, select_features};
+let mut df = ...; // your Polars DataFrame
+// To add only indicators:
+let result = select_features(&mut df, FeatureSelection::Indicators);
+// To run a strategy:
+let result = select_features(&mut df, FeatureSelection::Strategy { strategy_name: "daily_1", params: None });
+// To do both:
+let result = select_features(&mut df, FeatureSelection::All { strategy_name: "daily_1", params: None });
+```
+
+See the crate documentation for more details and examples.
+
+---
+
 ## Installation
 
 Add to your `Cargo.toml`:

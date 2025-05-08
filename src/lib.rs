@@ -264,9 +264,68 @@ pub mod util;
 pub use indicators::*;
 pub use strategy::*;
 
+use polars::prelude::Series;
+use polars::prelude::NamedFrom;
+
 // This is a placeholder function - should be removed before final release
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
+}
+
+/// Enum for selecting which features to compute or expose
+pub enum FeatureSelection<'a> {
+    Indicators,
+    Strategy {
+        /// Name of the strategy module (e.g., "daily_1", "minute_2", etc.)
+        strategy_name: &'a str,
+        /// Optional parameters for the strategy (if needed)
+        params: Option<Box<dyn std::any::Any>>,
+    },
+    All {
+        /// Name of the strategy module
+        strategy_name: &'a str,
+        /// Optional parameters for the strategy
+        params: Option<Box<dyn std::any::Any>>,
+    },
+}
+
+/// Central function to select features (indicators, strategy, or all)
+pub fn select_features(
+    df: &mut polars::prelude::DataFrame,
+    selection: FeatureSelection,
+) -> polars::prelude::PolarsResult<polars::prelude::DataFrame> {
+    match selection {
+        FeatureSelection::Indicators => {
+            indicators::add_technical_indicators(df)
+        }
+        FeatureSelection::Strategy { strategy_name, params } => {
+            // Example: match on strategy_name and call the appropriate strategy
+            match strategy_name {
+                "daily_1" => {
+                    use crate::strategy::daily::multi_indicator_daily_1;
+                    let params = params
+                        .and_then(|p| p.downcast::<multi_indicator_daily_1::StrategyParams>().ok())
+                        .map(|b| *b)
+                        .unwrap_or_else(multi_indicator_daily_1::StrategyParams::default);
+                    let signals = multi_indicator_daily_1::run_strategy(df, &params)
+                        .map_err(|e| polars::prelude::PolarsError::ComputeError(format!("Strategy error: {e}").into()))?;
+                    // Return a DataFrame with signals (user can extract more as needed)
+                    let mut result = df.clone();
+                    result.with_column(Series::new("buy_signals".into(), &signals.buy_signals[..]))?;
+                    result.with_column(Series::new("sell_signals".into(), &signals.sell_signals[..]))?;
+                    Ok(result)
+                }
+                // Add more strategies as needed
+                _ => Err(polars::prelude::PolarsError::ComputeError("Unknown strategy name".into())),
+            }
+        }
+        FeatureSelection::All { strategy_name, params } => {
+            // Add indicators first
+            let mut df_with_ind = indicators::add_technical_indicators(df)?;
+            // Then run strategy
+            select_features(&mut df_with_ind, FeatureSelection::Strategy { strategy_name, params })
+        }
+    }
 }
 
 #[cfg(test)]

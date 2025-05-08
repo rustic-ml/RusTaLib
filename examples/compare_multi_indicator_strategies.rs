@@ -3,8 +3,15 @@ use ta_lib_in_rust::strategy::daily::multi_indicator_daily_1;
 use ta_lib_in_rust::strategy::daily::multi_indicator_daily_2;
 use ta_lib_in_rust::strategy::daily::multi_indicator_daily_3;
 use ta_lib_in_rust::strategy::daily::multi_indicator_daily_4;
+use ta_lib_in_rust::{FeatureSelection, select_features};
+use std::env;
 
 fn main() -> Result<(), PolarsError> {
+    // Parse CLI arguments for feature selection
+    let args: Vec<String> = env::args().collect();
+    let feature_mode = args.get(1).map(|s| s.as_str()).unwrap_or("all");
+    let strategy_name = args.get(2).map(|s| s.as_str()).unwrap_or("daily_1");
+
     // Define the tickers to analyze
     let tickers = vec!["AAPL", "GOOGL", "MSFT"];
 
@@ -29,7 +36,7 @@ fn main() -> Result<(), PolarsError> {
         println!("==============================================================");
 
         // Load ticker's daily OHLCV data
-        let file_path = format!("examples/{}_daily_ohlcv.csv", ticker);
+        let file_path = format!("examples/csv/{}_daily_ohlcv.csv", ticker);
 
         // Read CSV file with Polars using CsvReadOptions
         let df = CsvReadOptions::default()
@@ -45,7 +52,7 @@ fn main() -> Result<(), PolarsError> {
         }
 
         // Create a new DataFrame with renamed columns and proper types
-        let df = df
+        let mut df = df
             .lazy()
             .select([
                 col("Open").alias("open"),
@@ -55,6 +62,15 @@ fn main() -> Result<(), PolarsError> {
                 col("Volume").cast(DataType::Float64).alias("volume"),
             ])
             .collect()?;
+
+        // Feature selection logic
+        let selection = match feature_mode {
+            "indicators" => FeatureSelection::Indicators,
+            "strategy" => FeatureSelection::Strategy { strategy_name, params: None },
+            _ => FeatureSelection::All { strategy_name, params: None },
+        };
+        let result_df = select_features(&mut df, selection)?;
+        println!("\nResulting DataFrame for {ticker} ({feature_mode}):\n{result_df}");
 
         println!("--------------------------------------------------------------");
         println!(

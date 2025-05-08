@@ -2,8 +2,15 @@ use polars::prelude::*;
 use ta_lib_in_rust::strategy::minute::{
     multi_indicator_minute_1, multi_indicator_minute_2, multi_indicator_minute_3,
 };
+use ta_lib_in_rust::{FeatureSelection, select_features};
+use std::env;
 
 fn main() -> Result<(), PolarsError> {
+    // Parse CLI arguments for feature selection
+    let args: Vec<String> = env::args().collect();
+    let feature_mode = args.get(1).map(|s| s.as_str()).unwrap_or("all");
+    let strategy_name = args.get(2).map(|s| s.as_str()).unwrap_or("minute_1");
+
     println!("Loading minute OHLCV data...");
     let df = CsvReadOptions::default()
         .with_has_header(true)
@@ -15,7 +22,7 @@ fn main() -> Result<(), PolarsError> {
     println!("{}", df.head(Some(5)));
 
     // Create a DataFrame with lowercase column names expected by the indicators
-    let df = df
+    let mut df = df
         .lazy()
         .select([
             col("Symbol").alias("symbol"),
@@ -28,6 +35,15 @@ fn main() -> Result<(), PolarsError> {
             col("VWAP").alias("vwap"),
         ])
         .collect()?;
+
+    // Feature selection logic
+    let selection = match feature_mode {
+        "indicators" => FeatureSelection::Indicators,
+        "strategy" => FeatureSelection::Strategy { strategy_name, params: None },
+        _ => FeatureSelection::All { strategy_name, params: None },
+    };
+    let result_df = select_features(&mut df, selection)?;
+    println!("\nResulting DataFrame ({feature_mode}):\n{result_df}");
 
     // Initialize strategies with default parameters
     let params1 = multi_indicator_minute_1::StrategyParams::default();
