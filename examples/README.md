@@ -1,55 +1,64 @@
-# Technical Indicators Examples
+# Technical Analysis and Trading Strategy Examples
 
-This directory contains simple examples showing how to use the technical indicators provided by this library.
+This directory contains examples showing how to use the technical indicators and trading strategies provided by this library.
 
-## Basic Examples
+## Directory Structure
 
-- `rsi_basic.rs` - Shows how to calculate and interpret the Relative Strength Index
-- `macd_basic.rs` - Demonstrates the Moving Average Convergence Divergence indicator
-- `bollinger_bands_basic.rs` - Example of Bollinger Bands volatility indicator
-- `moving_averages_basic.rs` - Comparison of different moving average types (SMA, EMA, WMA)
+The examples are organized by category:
 
-## CSV Reading Examples
+- `general/` - Basic technical indicators that apply to all markets
+- `stock/` - Stock market specific strategies and indicators
+- `options/` - Options trading strategies and volatility analysis
+- `csv/` - Sample CSV data files for testing
 
-Several examples demonstrate how to load data from CSV files:
+## General Technical Indicators
 
-- `compare_minute_indicator_strategies.rs` - Shows how to read minute-level OHLCV data and convert integer volume to float
-- `compare_multi_indicator_strategies.rs` - Demonstrates proper CSV reading with column renaming
-- `multi_indicator_strategy_for_daily_ohlcv.rs` - Shows CSV reading with a predefined schema
-- `enhanced_minute_strategy_example.rs` - Demonstrates a multi-indicator intraday strategy for minute-level OHLCV data. Runs a full backtest, prints performance metrics, and saves all signals and indicators to `enhanced_minute_strategy_results.csv` for further analysis.
+Basic examples showing fundamental technical analysis concepts:
 
-Note that when using Polars 0.46.0, CSV files should be read using the `CsvReadOptions` approach:
+- `general/basic_indicators.rs` - Shows how to calculate and interpret various technical indicators including moving averages, oscillators, and Bollinger Bands
 
-```rust
-// Read a CSV file with headers
-let df = CsvReadOptions::default()
-    .with_has_header(true)
-    .try_into_reader_with_file_path(Some("path/to/file.csv".into()))?
-    .finish()?;
-```
+## Stock Market Strategies
+
+Stock market specific trading strategies:
+
+- `stock/trend_following.rs` - Demonstrates a trend following strategy using EMAs and RSI
+- `stock/mean_reversion.rs` - Shows a mean reversion strategy based on Z-score
+- `stock/breakout.rs` - Implements a breakout strategy with volume confirmation
+- `stock/volume_based.rs` - Shows volume-based strategies for stock trading
+
+## Options Trading Strategies
+
+Options market specific trading strategies:
+
+- `options/vertical_spreads.rs` - Demonstrates vertical spread strategies (bull put and bear call spreads)
+- `options/iron_condor.rs` - Shows how to implement iron condor strategies for range-bound markets
+- `options/volatility_strategies.rs` - Demonstrates volatility-based options strategies
+- `options/delta_neutral.rs` - Shows delta-neutral options strategies implementation
 
 ## Running the Examples
 
 To run any example, use the following command from the project root:
 
 ```bash
-cargo run --example <example_name>
+cargo run --example <folder>/<example_name>
 ```
 
 For instance:
 
 ```bash
-cargo run --example rsi_basic
+cargo run --example general/basic_indicators
+cargo run --example stock/trend_following
 ```
 
-## Notes
+## Notes for Real-World Application
 
-These examples use synthetic data for demonstration purposes. In real-world applications, you would:
+These examples use synthetic data for demonstration purposes. In real-world applications, you should:
 
 - Import actual market data (CSV files, APIs, etc.)
-- Apply proper backtesting methodology
-- Consider transaction costs and slippage
-- Combine multiple indicators for confirmation
-- Implement risk management strategies
+- Apply proper backtesting methodology with realistic assumptions
+- Consider transaction costs, slippage, and market impact
+- Implement proper position sizing and risk management
+- Test strategies across different market conditions
+- Consider regulatory and tax implications
 
-The examples are designed to be simple and focus on demonstrating the basic usage of each indicator. 
+Each example provides a simplified implementation to demonstrate the concepts. In production trading systems, more sophisticated implementations would be required. 

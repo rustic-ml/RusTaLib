@@ -405,7 +405,11 @@ pub fn calculate_rolling_std(
         }
 
         let avg = sum / window as f64;
-        let variance = sum_sq / window as f64 - avg * avg;
+        let variance = if window > 1 {
+            (sum_sq - sum * avg) / (window as f64 - 1.0)
+        } else {
+            0.0
+        };
 
         if variance < 0.0 {
             // Due to floating point errors, variance can be slightly negative

@@ -6,9 +6,8 @@
 //!
 //! ## Asset-Specific Strategy Modules
 //!
-//! - [`stock`](stock/index.html): Strategies optimized for stock/equity markets
-//! - [`options`](options/index.html): Strategies optimized for options trading
-//! - [`crypto`](crypto/index.html): Strategies optimized for cryptocurrency markets
+//! - [`stock`](stock/index.html): Strategies for stock markets
+//! - [`options`](options/index.html): Options trading strategies
 //!
 //! Each strategy module typically provides:
 //!
@@ -52,7 +51,6 @@
 // Asset-specific strategy modules
 pub mod stock;
 pub mod options;
-pub mod crypto;
 
 // Re-export commonly used stock strategies
 pub use stock::trend_following;
@@ -66,8 +64,3 @@ pub use options::iron_condor;
 pub use options::volatility_strategies;
 pub use options::delta_neutral;
 
-// Re-export commonly used crypto strategies
-pub use crypto::momentum;
-pub use crypto::market_neutral;
-pub use crypto::arbitrage;
-pub use crypto::grid_trading;

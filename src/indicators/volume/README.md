@@ -99,5 +99,4 @@ let cmf = calculate_cmf(&dataframe, 20)?;
 - Use volume indicators alongside price-based indicators
 - Be wary of price movements on very low volume
 - Consider time of day, as volume typically varies throughout trading sessions
-- Adjust interpretations based on the specific market (stocks, forex, crypto, etc.)
 - Compare volume indicators across multiple timeframes for confirmation 

@@ -47,14 +47,9 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     }
 
     // Validate window size
-    if window == 0 || window > df.height() {
+    if window == 0 {
         return Err(PolarsError::ComputeError(
-            format!(
-                "Invalid window size {} for dataset with {} rows",
-                window,
-                df.height()
-            )
-            .into(),
+            "Window size must be greater than 0".into(),
         ));
     }
 
@@ -96,24 +91,28 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     // Calculate CMF values
     let mut cmf_values = Vec::with_capacity(df.height());
 
-    // Fill in NaN values for the initial window
-    for _ in 0..window.min(df.height()) {
-        cmf_values.push(f64::NAN);
-    }
-
-    // Make sure we have enough data to calculate CMF
-    if df.height() <= window {
+    // If dataset is smaller than window, return all NaN values
+    if df.height() < window {
+        for _ in 0..df.height() {
+            cmf_values.push(f64::NAN);
+        }
         return Ok(Series::new(format!("cmf_{}", window).into(), cmf_values));
     }
 
+    // Fill in NaN values for the initial window
+    for _ in 0..window - 1 {
+        cmf_values.push(f64::NAN);
+    }
+
     // Calculate CMF for each period after the initial window
-    for i in window..df.height() {
+    for i in window - 1..df.height() {
         let mut money_flow_volume_sum = 0.0;
         let mut volume_sum = 0.0;
         let mut has_nan = false;
 
         // Sum up money flow volumes and volumes over the window
-        for (j, &mfv) in money_flow_volumes.iter().enumerate().take(i).skip(i - window) {
+        for j in i - (window - 1)..=i {
+            let mfv = money_flow_volumes[j];
             let vol = volume.get(j).unwrap_or(f64::NAN);
 
             if mfv.is_nan() || vol.is_nan() {

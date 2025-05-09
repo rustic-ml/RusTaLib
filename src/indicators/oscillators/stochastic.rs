@@ -101,13 +101,14 @@ pub fn calculate_stochastic(
     // Apply slowing to %K (if slowing > 1)
     let mut k_values = Vec::with_capacity(df.height());
 
-    // Fill initial values with NaN
-    for _i in 0..k_period + slowing - 2 {
+    // Fill initial values with NaN - ensure we have NaN for all values before k_period + slowing - 1
+    let k_offset = k_period + slowing - 1;
+    for _ in 0..k_offset {
         k_values.push(f64::NAN);
     }
 
     // Calculate slowed %K
-    for i in k_period + slowing - 2..df.height() {
+    for i in k_offset..df.height() {
         let mut sum = 0.0;
         let mut count = 0;
         let mut has_nan = false;
@@ -133,12 +134,13 @@ pub fn calculate_stochastic(
     let mut d_values = Vec::with_capacity(df.height());
 
     // Fill initial values with NaN
-    for _i in 0..k_period + slowing + d_period - 3 {
+    let d_offset = k_offset + d_period - 1;
+    for _ in 0..d_offset {
         d_values.push(f64::NAN);
     }
 
     // Calculate %D
-    for i in k_period + slowing + d_period - 3..df.height() {
+    for i in d_offset..df.height() {
         let mut sum = 0.0;
         let mut count = 0;
         let mut has_nan = false;
@@ -200,7 +202,10 @@ mod tests {
 
         // Check that values before the required periods are NaN
         for i in 0..k_offset {
-            assert!(stoch_k.f64().unwrap().get(i).unwrap().is_nan());
+            assert!(stoch_k.f64().unwrap().get(i).unwrap().is_nan(), 
+                "Expected NaN at index {}, got {}", 
+                i, 
+                stoch_k.f64().unwrap().get(i).unwrap());
         }
 
         for i in 0..d_offset {

@@ -301,21 +301,6 @@ pub fn select_features(
                     result.with_column(Series::new("sell_signals".into(), &signals.sell_signals[..]))?;
                     Ok(result)
                 }
-                "crypto::momentum" => {
-                    use crate::strategy::crypto::momentum;
-                    let params = params
-                        .and_then(|p| p.downcast::<momentum::StrategyParams>().ok())
-                        .map(|b| *b)
-                        .unwrap_or_else(momentum::StrategyParams::default);
-                    let signals = momentum::run_strategy(df, None, &params)
-                        .map_err(|e| polars::prelude::PolarsError::ComputeError(format!("Strategy error: {e}").into()))?;
-                    // Return a DataFrame with signals (user can extract more as needed)
-                    let mut result = df.clone();
-                    result.with_column(Series::new("buy_signals".into(), &signals.buy_signals[..]))?;
-                    result.with_column(Series::new("sell_signals".into(), &signals.sell_signals[..]))?;
-                    result.with_column(Series::new("position_size".into(), &signals.position_sizes[..]))?;
-                    Ok(result)
-                }
                 "options::vertical_spreads" => {
                     use crate::strategy::options::vertical_spreads;
                     let params = params

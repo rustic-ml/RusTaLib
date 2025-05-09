@@ -19,6 +19,7 @@ exclude = [
     # Use a trailing slash '/' to ensure it's treated as a directory.
     "examples/",
     "target/",
+    "src/test/",
 
     ".gitignore",
     "Cargo.lock",
@@ -36,6 +37,51 @@ chrono = "0.4.34"
 thiserror = "2.0.11" # Consider updating if needed, check compatibility
 ndarray = "0.16.1" # Consider updating if needed, check compatibility
 serde = { version = "1.0", features = ["derive"] }
+rand = "0.8.5"
 
 [dev-dependencies]
 approx = "0.5.1"
+
+# General examples
+[[example]]
+name = "general_basic_indicators"
+path = "examples/general/basic_indicators.rs"
+
+# Stock market strategy examples
+[[example]]
+name = "stock_trend_following"
+path = "examples/stock/trend_following.rs"
+
+[[example]]
+name = "stock_mean_reversion"
+path = "examples/stock/mean_reversion.rs"
+
+# Options trading strategy examples
+[[example]]
+name = "options_vertical_spreads"
+path = "examples/options/vertical_spreads.rs"
+
+[[example]]
+name = "options_iron_condor"
+path = "examples/options/iron_condor.rs"
+
+# Basic indicators examples
+[[example]]
+name = "bollinger_bands_basic"
+path = "examples/bollinger_bands_basic.rs"
+
+[[example]]
+name = "macd_basic"
+path = "examples/macd_basic.rs"
+
+[[example]]
+name = "moving_averages_basic"
+path = "examples/moving_averages_basic.rs"
+
+[[example]]
+name = "rsi_basic"
+path = "examples/rsi_basic.rs"
+
+[[example]]
+name = "working_with_multi_stock_data"
+path = "examples/working_with_multi_stock_data.rs"

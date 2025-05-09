@@ -8,9 +8,8 @@
 //!
 //! ## Asset-Specific Indicator Modules
 //!
-//! - [`stock`](stock/index.html): Indicators optimized for stock/equity markets
-//! - [`options`](options/index.html): Indicators optimized for options analysis
-//! - [`crypto`](crypto/index.html): Indicators optimized for cryptocurrency markets
+//! - [`stock`](stock/index.html): Indicators for stock/equity markets
+//! - [`options`](options/index.html): Indicators for options trading
 //!
 //! ## Traditional Indicator Categories
 //!
@@ -35,7 +34,6 @@
 // Asset-specific indicator modules
 pub mod stock;
 pub mod options;
-pub mod crypto;
 
 // Traditional indicator category modules
 pub mod moving_averages;
@@ -74,5 +72,3 @@ pub use stock::price_action;
 pub use stock::fundamental;
 pub use options::implied_volatility;
 pub use options::greeks;
-pub use crypto::blockchain_metrics;
-pub use crypto::market_sentiment;
