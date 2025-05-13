@@ -1,11 +1,11 @@
 use polars::prelude::*;
-use std::convert::TryInto;
-use ta_lib_in_rust::indicators::{
+use rusttalib::indicators::{
     moving_averages::{calculate_ema, calculate_sma},
     oscillators::{calculate_macd, calculate_rsi},
     volatility::{calculate_atr, calculate_bollinger_bands},
     volume::calculate_obv,
 };
+use std::convert::TryInto;
 
 /// This example demonstrates how to load and process data from multiple stock CSV files
 /// that may have different column formats, and perform cross-stock comparisons.

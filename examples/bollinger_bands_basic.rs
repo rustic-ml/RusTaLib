@@ -1,5 +1,5 @@
 use polars::prelude::*;
-use ta_lib_in_rust::indicators::volatility::calculate_bollinger_bands;
+use rusttalib::indicators::volatility::calculate_bollinger_bands;
 
 fn main() -> Result<(), PolarsError> {
     // Create a simple price series with some movement

@@ -1,5 +1,5 @@
 use polars::prelude::*;
-use ta_lib_in_rust::indicators::oscillators::calculate_rsi;
+use rusttalib::indicators::oscillators::calculate_rsi;
 
 fn main() -> Result<(), PolarsError> {
     // Create a simple price series with some movement

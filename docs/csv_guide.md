@@ -1,6 +1,6 @@
-# Working with CSV Data in ta-lib-in-rust
+# Working with CSV Data in rusttalib
 
-This guide explains how to effectively work with CSV data when using the ta-lib-in-rust library.
+This guide explains how to effectively work with CSV data when using the rusttalib library.
 
 ## CSV Format Requirements
 

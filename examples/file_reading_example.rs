@@ -1,8 +1,6 @@
 use polars::prelude::*;
+use rusttalib::util::file_utils::{read_csv, read_csv_default, read_financial_data, read_parquet};
 use std::error::Error;
-use ta_lib_in_rust::util::file_utils::{
-    read_csv, read_csv_default, read_financial_data, read_parquet,
-};
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("======= Reading Financial Data Files Example =======\n");

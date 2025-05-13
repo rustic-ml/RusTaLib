@@ -8,7 +8,7 @@ pub fn calculate_dpo(df: &DataFrame, close_col: &str, period: usize) -> PolarsRe
     let len = df.height();
     let mut dpo = vec![f64::NAN; len];
     let shift = period / 2 + 1;
-    
+
     for (i, _) in (0..len).enumerate() {
         if i + 1 >= period {
             let sma: f64 = close

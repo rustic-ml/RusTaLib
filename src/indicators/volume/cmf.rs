@@ -100,7 +100,12 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
 
         // Use an iterator-based approach as suggested by Clippy
         let window_start = i - (window - 1);
-        for (idx, money_flow_vol) in money_flow_volumes.iter().enumerate().skip(window_start).take(window) {
+        for (idx, money_flow_vol) in money_flow_volumes
+            .iter()
+            .enumerate()
+            .skip(window_start)
+            .take(window)
+        {
             let vol = volume.get(idx).unwrap_or(f64::NAN);
 
             if !money_flow_vol.is_nan() && !vol.is_nan() {
