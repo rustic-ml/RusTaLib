@@ -1,5 +1,5 @@
 use polars::prelude::*;
-use ta_lib_in_rust::indicators::moving_averages::{calculate_ema, calculate_sma, calculate_wma};
+use rusttalib::indicators::moving_averages::{calculate_ema, calculate_sma, calculate_wma};
 
 fn main() -> Result<(), PolarsError> {
     // Create a simple price series with trend followed by sideways movement

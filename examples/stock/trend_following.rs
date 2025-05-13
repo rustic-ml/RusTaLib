@@ -2,9 +2,9 @@
 // This example demonstrates a simple trend following strategy using technical indicators
 
 use polars::prelude::*;
-use ta_lib_in_rust::indicators::moving_averages::calculate_sma;
-use ta_lib_in_rust::indicators::oscillators::{calculate_macd, calculate_rsi};
-use ta_lib_in_rust::indicators::trend::calculate_adx;
+use rusttalib::indicators::moving_averages::calculate_sma;
+use rusttalib::indicators::oscillators::{calculate_macd, calculate_rsi};
+use rusttalib::indicators::trend::calculate_adx;
 
 fn main() -> Result<(), PolarsError> {
     println!("Trend Following Strategy Example");
