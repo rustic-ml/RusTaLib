@@ -1,6 +1,6 @@
-# Working with CSV Data in rusttalib
+# Working with CSV Data in rustalib
 
-This guide explains how to effectively work with CSV data when using the rusttalib library.
+This guide explains how to effectively work with CSV data when using the rustalib library.
 
 ## CSV Format Requirements
 

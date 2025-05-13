@@ -1,5 +1,5 @@
 use polars::prelude::*;
-use rusttalib::indicators::oscillators::calculate_macd;
+use rustalib::indicators::oscillators::calculate_macd;
 
 fn main() -> Result<(), PolarsError> {
     // Create a simple price series with some movement

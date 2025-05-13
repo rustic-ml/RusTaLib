@@ -1,5 +1,5 @@
 use polars::prelude::*;
-use rusttalib::util::file_utils::{read_csv, read_csv_default, read_financial_data, read_parquet};
+use rustalib::util::file_utils::{read_csv, read_csv_default, read_financial_data, read_parquet};
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {

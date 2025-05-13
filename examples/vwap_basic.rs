@@ -2,7 +2,7 @@
 // This example demonstrates how to calculate and visualize VWAP
 
 use polars::prelude::*;
-use rusttalib::indicators::moving_averages::calculate_vwap;
+use rustalib::indicators::moving_averages::calculate_vwap;
 
 fn main() -> Result<(), PolarsError> {
     println!("VWAP (Volume Weighted Average Price) Example");

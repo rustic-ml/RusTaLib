@@ -1,17 +1,17 @@
 # RusTalib, the Crustacean Financial Analyst 🦀
 
-Meet **Rustalib**, your steadfast crustacean companion for navigating the currents of financial markets! This comprehensive Rust library, `rusttalib`, provides a powerful toolkit for calculating technical indicators, all powered by the high-performance [Polars](https://pola.rs/) DataFrame library.
+Meet **Rustalib**, your steadfast crustacean companion for navigating the currents of financial markets! This comprehensive Rust library, `rustalib`, provides a powerful toolkit for calculating technical indicators, all powered by the high-performance [Polars](https://pola.rs/) DataFrame library.
 
 Whether you're charting, backtesting, or building live trading systems, Rustalib is here to help you process market data with speed and precision.
 
-![Technical Indicators Library Icon](images_processed.png) [![crates.io](https://img.shields.io/crates/v/rusttalib.svg)](https://crates.io/crates/rusttalib)
-[![docs.rs](https://docs.rs/rusttalib/badge.svg)](https://docs.rs/rusttalib)
+![Technical Indicators Library Icon](images_processed.png) [![crates.io](https://img.shields.io/crates/v/rustalib.svg)](https://crates.io/crates/rustalib)
+[![docs.rs](https://docs.rs/rustalib/badge.svg)](https://docs.rs/rustalib)
 
 ---
 
 ## Project Overview
 
-**rusttalib** provides a robust, extensible, and efficient toolkit for quantitative finance, algorithmic trading, and data science in Rust. The library is designed for:
+**rustalib** provides a robust, extensible, and efficient toolkit for quantitative finance, algorithmic trading, and data science in Rust. The library is designed for:
 - **Fast, vectorized computation** using Polars DataFrames
 - **Easy integration** with modern Rust data workflows
 - **Modular design**: Use only the indicators you need
@@ -44,7 +44,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rusttalib = "*" # Or specify a version
+rustalib = "*" # Or specify a version
 polars = { version = "0.46", features = ["lazy", "dtype-full"] }
 ```
 
@@ -143,9 +143,9 @@ Contributions are welcome! Please:
 ---
 
 ## Links
-- [Crates.io](https://crates.io/crates/rusttalib)
-- [Documentation (docs.rs)](https://docs.rs/rusttalib)
-- [GitHub Repository](https://github.com/rustic-ml/rusttalib)
+- [Crates.io](https://crates.io/crates/rustalib)
+- [Documentation (docs.rs)](https://docs.rs/rustalib)
+- [GitHub Repository](https://github.com/rustic-ml/rustalib)
 
 ## License
 

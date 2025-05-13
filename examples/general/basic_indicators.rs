@@ -1,5 +1,5 @@
 use polars::prelude::*;
-use rusttalib::indicators::{
+use rustalib::indicators::{
     moving_averages::{calculate_ema, calculate_sma, calculate_wma},
     oscillators::{calculate_macd, calculate_rsi},
     volatility::calculate_bollinger_bands,

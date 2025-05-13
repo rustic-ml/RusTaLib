@@ -2,9 +2,9 @@
 // This example demonstrates a simple mean reversion strategy using technical indicators
 
 use polars::prelude::*;
-use rusttalib::indicators::moving_averages::calculate_sma;
-use rusttalib::indicators::oscillators::calculate_rsi;
-use rusttalib::indicators::volatility::calculate_bollinger_bands;
+use rustalib::indicators::moving_averages::calculate_sma;
+use rustalib::indicators::oscillators::calculate_rsi;
+use rustalib::indicators::volatility::calculate_bollinger_bands;
 
 fn main() -> Result<(), PolarsError> {
     println!("Mean Reversion Strategy Example");
