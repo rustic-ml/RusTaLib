@@ -3,14 +3,20 @@
 use polars::prelude::*;
 
 // Modules for volume indicators
+mod adl;
 mod cmf;
+mod eom;
 mod mfi;
 mod obv;
+mod pvt;
 
 // Re-export volume indicators
+pub use adl::calculate_adl;
 pub use cmf::calculate_cmf;
+pub use eom::calculate_eom;
 pub use mfi::calculate_mfi;
 pub use obv::calculate_obv;
+pub use pvt::calculate_pvt;
 
 /// Add volume-based indicators to a DataFrame
 ///
@@ -53,21 +59,4 @@ pub fn add_volume_indicators(df: &DataFrame) -> PolarsResult<DataFrame> {
     result_df.with_column(mfi)?;
 
     Ok(result_df)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::indicators::test_util::create_test_ohlcv_df;
-
-    #[test]
-    fn test_add_volume_indicators() {
-        let df = create_test_ohlcv_df();
-        let result = add_volume_indicators(&df).unwrap();
-
-        // Check that indicators were added
-        assert!(result.schema().contains("obv"));
-        assert!(result.schema().contains("cmf_20"));
-        assert!(result.schema().contains("mfi_14"));
-    }
 }

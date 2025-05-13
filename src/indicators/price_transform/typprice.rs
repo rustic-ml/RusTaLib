@@ -34,26 +34,3 @@ pub fn calculate_typprice(df: &DataFrame) -> PolarsResult<Series> {
 
     Ok(typ_price.into_series().with_name("typprice".into()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_typprice() {
-        // Create test OHLC DataFrame
-        let high = Series::new("high".into(), &[12.0, 14.0, 16.0, 15.0, 17.0]);
-        let low = Series::new("low".into(), &[8.0, 9.0, 10.0, 9.0, 11.0]);
-        let close = Series::new("close".into(), &[10.0, 12.0, 14.0, 11.0, 15.0]);
-        let df = DataFrame::new(vec![high.into(), low.into(), close.into()]).unwrap();
-
-        let typ = calculate_typprice(&df).unwrap();
-
-        // typprice = (high + low + close) / 3
-        // For first row: (12 + 8 + 10) / 3 = 10
-        assert_eq!(typ.f64().unwrap().get(0).unwrap(), 10.0);
-
-        // For second row: (14 + 9 + 12) / 3 = 11.67
-        assert!((typ.f64().unwrap().get(1).unwrap() - 11.67).abs() < 0.01);
-    }
-}

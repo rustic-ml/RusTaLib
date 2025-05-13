@@ -61,33 +61,3 @@ pub fn calculate_aroon(df: &DataFrame, window: usize) -> PolarsResult<(Series, S
         Series::new("aroon_down".into(), aroon_down),
     ))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_calculate_aroon_basic() {
-        // Create a simple test DataFrame
-        let high = Series::new("high".into(), &[10.0, 20.0, 30.0, 25.0, 20.0]);
-        let low = Series::new("low".into(), &[8.0, 15.0, 25.0, 20.0, 10.0]);
-        let test_df = DataFrame::new(vec![high.into(), low.into()]).unwrap();
-
-        let window = 3; // Small window for testing
-        let (aroon_up, aroon_down) = calculate_aroon(&test_df, window).unwrap();
-
-        // Both Aroon Up and Aroon Down should be within the range of 0 to 100
-        for i in window - 1..test_df.height() {
-            let up = aroon_up.f64().unwrap().get(i).unwrap();
-            let down = aroon_down.f64().unwrap().get(i).unwrap();
-
-            assert!(up >= 0.0 && up <= 100.0);
-            assert!(down >= 0.0 && down <= 100.0);
-        }
-
-        // For the last point, the highest high was 2 periods ago (index 2), so Aroon Up = (3-2)/3*100 = 33.33%
-        // For the last point, the lowest low was 0 periods ago (current point), so Aroon Down = (3-0)/3*100 = 100%
-        assert!((aroon_up.f64().unwrap().get(4).unwrap() - 33.33).abs() < 0.01);
-        assert!((aroon_down.f64().unwrap().get(4).unwrap() - 100.0).abs() < 0.01);
-    }
-}

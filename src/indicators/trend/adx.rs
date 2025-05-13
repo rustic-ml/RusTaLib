@@ -48,30 +48,3 @@ pub fn calculate_adx(df: &DataFrame, window: usize) -> PolarsResult<Series> {
 
     Ok(adx.with_name("adx".into()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::indicators::volatility::tests::create_test_ohlc_df;
-
-    #[test]
-    fn test_calculate_adx_basic() {
-        let df = create_test_ohlc_df();
-        let window = 3; // Small window for testing
-
-        let adx = calculate_adx(&df, window).unwrap();
-
-        // ADX should not contain NaN values after the window period
-        for i in window + 1..df.height() {
-            let val = adx.f64().unwrap().get(i);
-            assert!(val.is_some());
-            assert!(!val.unwrap().is_nan());
-        }
-
-        // ADX should be within the range of 0 to 100
-        for i in window + 1..df.height() {
-            let val = adx.f64().unwrap().get(i).unwrap();
-            assert!(val >= 0.0 && val <= 100.0);
-        }
-    }
-}

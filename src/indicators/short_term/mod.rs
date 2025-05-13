@@ -1,10 +1,10 @@
 //! # Short-Term Trading Indicators
-//! 
+//!
 //! This module provides indicators optimized for short-term trading with
 //! a timeframe of days to weeks, suitable for swing trading approaches.
-//! 
+//!
 //! ## Types of Indicators
-//! 
+//!
 //! - Swing trading momentum indicators
 //! - Short-term trend identification tools
 //! - Pattern recognition for multi-day setups
@@ -25,10 +25,7 @@ use polars::prelude::*;
 /// # Returns
 ///
 /// * `Result<Series, PolarsError>` - Series with swing strength values
-pub fn swing_strength_index(
-    df: &DataFrame,
-    period: usize,
-) -> Result<Series, PolarsError> {
+pub fn swing_strength_index(df: &DataFrame, _period: usize) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let values = vec![0.0; df.height()];
     Ok(Series::new("swing_strength".into(), values))
@@ -50,8 +47,8 @@ pub fn swing_strength_index(
 /// * `Result<Series, PolarsError>` - Series with regime values (1 = trending, 0 = ranging, -1 = transitional)
 pub fn short_term_regime_detector(
     df: &DataFrame,
-    atr_period: usize,
-    trend_period: usize,
+    _atr_period: usize,
+    _trend_period: usize,
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let values = vec![0i32; df.height()];
@@ -74,8 +71,8 @@ pub fn short_term_regime_detector(
 /// * `Result<Series, PolarsError>` - Series with dip-buying scores (0-100)
 pub fn dip_buying_score(
     df: &DataFrame,
-    trend_period: usize,
-    oversold_threshold: f64,
+    _trend_period: usize,
+    _oversold_threshold: f64,
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let values = vec![50.0; df.height()];
@@ -97,9 +94,9 @@ pub fn dip_buying_score(
 ///
 /// * `Result<DataFrame, PolarsError>` - DataFrame with detected patterns and attributes
 pub fn multi_day_pattern_detector(
-    df: &DataFrame,
-    max_pattern_length: usize,
-    min_pattern_quality: f64,
+    _df: &DataFrame,
+    _max_pattern_length: usize,
+    _min_pattern_quality: f64,
 ) -> Result<DataFrame, PolarsError> {
     // Placeholder implementation - create a simple DataFrame with pattern data
     df! {
@@ -107,4 +104,67 @@ pub fn multi_day_pattern_detector(
         "pattern_start" => vec![10, 25, 40, 60, 80],
         "pattern_quality" => vec![0.85, 0.76, 0.92, 0.68, 0.0]
     }
-} 
+}
+
+/// Calculate average range for swing trading
+///
+/// # Arguments
+///
+/// * `df` - DataFrame with OHLC data
+/// * `period` - Lookback period for range calculation
+pub fn calculate_average_range(df: &DataFrame, _period: usize) -> Result<Series, PolarsError> {
+    // Placeholder implementation
+    let values = vec![0.0; df.height()];
+    Ok(Series::new("average_range".into(), values))
+}
+
+/// Find potential swing points using ATR and trend  
+///
+/// # Arguments
+///
+/// * `df` - DataFrame with OHLC data
+/// * `atr_period` - Period for ATR calculation
+/// * `trend_period` - Period for trend identification
+pub fn find_swing_points(
+    df: &DataFrame,
+    _atr_period: usize,
+    _trend_period: usize,
+) -> Result<Series, PolarsError> {
+    // Placeholder implementation
+    let values = vec![0.0; df.height()];
+    Ok(Series::new("swing_points".into(), values))
+}
+
+/// Generate mean reversion signals based on oversold/overbought conditions
+///
+/// # Arguments
+///
+/// * `df` - DataFrame with OHLC data
+/// * `trend_period` - Period for trend identification
+/// * `oversold_threshold` - Threshold to identify oversold conditions
+pub fn mean_reversion_signals(
+    df: &DataFrame,
+    _trend_period: usize,
+    _oversold_threshold: f64,
+) -> Result<Series, PolarsError> {
+    // Placeholder implementation
+    let values = vec![0.0; df.height()];
+    Ok(Series::new("mean_reversion_signals".into(), values))
+}
+
+/// Detect chart patterns for swing trading
+///
+/// # Arguments
+///
+/// * `df` - DataFrame with OHLC data
+/// * `max_pattern_length` - Maximum length of patterns to detect
+/// * `min_pattern_quality` - Minimum quality threshold for pattern detection
+pub fn detect_chart_patterns(
+    price_df: &DataFrame,
+    _max_pattern_length: usize,
+    _min_pattern_quality: f64,
+) -> Result<Series, PolarsError> {
+    // Placeholder implementation
+    let values = vec![0.0; price_df.height()];
+    Ok(Series::new("chart_patterns".into(), values))
+}

@@ -5,7 +5,7 @@
 
 use polars::prelude::*;
 use polars::frame::DataFrame;
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap};
 
 /// Calculate volatility skew across strikes
 ///
@@ -114,7 +114,7 @@ pub fn calculate_strike_skew(
         }
     }
     
-    Ok(Series::new("strike_skew", skew))
+    Ok(Series::new("strike_skew".into(), skew))
 }
 
 /// Calculate wing skew ratio
@@ -176,7 +176,7 @@ pub fn calculate_wing_skew(
     
     // Calculate average IVs
     if atm_ivs.is_empty() || far_otm_put_ivs.is_empty() {
-        return Ok(Series::new("wing_skew", wing_skew));
+        return Ok(Series::new("wing_skew".into(), wing_skew));
     }
     
     let avg_atm_iv = atm_ivs.iter().sum::<f64>() / atm_ivs.len() as f64;
@@ -190,7 +190,7 @@ pub fn calculate_wing_skew(
         wing_skew[i] = wing_skew_ratio;
     }
     
-    Ok(Series::new("wing_skew", wing_skew))
+    Ok(Series::new("wing_skew".into(), wing_skew))
 }
 
 /// Calculate skew term structure
@@ -229,8 +229,9 @@ pub fn calculate_skew_term_structure(
     let mut expiry_groups: HashMap<String, Vec<usize>> = HashMap::new();
     
     for i in 0..len {
-        if let Some(exp) = expiry.get(i) {
-            let exp_str = exp.to_string();
+        let exp_result = expiry.get(i);
+        if let Ok(exp_value) = exp_result {
+            let exp_str = exp_value.to_string();
             expiry_groups.entry(exp_str).or_insert_with(Vec::new).push(i);
         }
     }
@@ -297,8 +298,9 @@ pub fn calculate_skew_term_structure(
         
         // Assign the slope to all rows matching each expiry
         for i in 0..len {
-            if let Some(exp) = expiry.get(i) {
-                let exp_str = exp.to_string();
+            let exp_result = expiry.get(i);
+            if let Ok(exp_value) = exp_result {
+                let exp_str = exp_value.to_string();
                 if let Some(exp_idx) = expirations.iter().position(|(e, _)| e == &exp_str) {
                     term_structure[i] = expirations[exp_idx].1;
                 }
@@ -306,7 +308,7 @@ pub fn calculate_skew_term_structure(
         }
     }
     
-    Ok(Series::new("skew_term_structure", term_structure))
+    Ok(Series::new("skew_term_structure".into(), term_structure))
 }
 
 /// Calculate skew breakpoints
@@ -330,29 +332,31 @@ pub fn calculate_skew_breakpoints(
     price_column: &str,
     is_call_column: &str,
 ) -> PolarsResult<DataFrame> {
-    // Extract required columns
-    let iv = df.column(iv_column)?.f64()?;
-    let strike = df.column(strike_column)?.f64()?;
-    let price = df.column(price_column)?.f64()?;
-    let is_call = df.column(is_call_column)?.bool()?;
+    // Validate required columns
+    if !df.schema().contains("strike") || !df.schema().contains("iv") {
+        return Err(PolarsError::ComputeError(
+            "Required columns 'strike' and 'iv' not found".into(),
+        ));
+    }
+    
+    let strike = df.column("strike")?.f64()?;
+    let iv = df.column("iv")?.f64()?;
     
     // Create vectors to store breakpoint data
     let mut breakpoint_strikes = Vec::new();
     let mut breakpoint_magnitudes = Vec::new();
     let mut breakpoint_directions = Vec::new();
     
-    // Group options by strike price
-    let mut strike_ivs: HashMap<f64, Vec<f64>> = HashMap::new();
+    // Group IVs by strike
+    let mut strike_ivs: BTreeMap<f64, Vec<f64>> = BTreeMap::new();
     
     for i in 0..df.height() {
-        let iv_val = iv.get(i).unwrap_or(f64::NAN);
         let strike_val = strike.get(i).unwrap_or(f64::NAN);
+        let iv_val = iv.get(i).unwrap_or(f64::NAN);
         
-        if iv_val.is_nan() || strike_val.is_nan() {
-            continue;
+        if !strike_val.is_nan() && !iv_val.is_nan() {
+            strike_ivs.entry(strike_val).or_insert_with(Vec::new).push(iv_val);
         }
-        
-        strike_ivs.entry(strike_val).or_insert_with(Vec::new).push(iv_val);
     }
     
     // Calculate average IV per strike
@@ -398,14 +402,14 @@ pub fn calculate_skew_breakpoints(
         }
     }
     
-    // Create result DataFrame
-    let result_df = DataFrame::new(vec![
-        Series::new("strike", breakpoint_strikes),
-        Series::new("magnitude", breakpoint_magnitudes),
-        Series::new("direction", breakpoint_directions),
+    // Create a DataFrame with the results
+    let result = DataFrame::new(vec![
+        Series::new("strike".into(), breakpoint_strikes).into(),
+        Series::new("magnitude".into(), breakpoint_magnitudes).into(),
+        Series::new("direction".into(), breakpoint_directions).into(),
     ])?;
     
-    Ok(result_df)
+    Ok(result)
 }
 
 /// Add all skew indicators to the DataFrame

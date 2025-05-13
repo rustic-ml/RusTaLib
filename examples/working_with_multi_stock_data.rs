@@ -35,28 +35,52 @@ fn main() -> Result<(), PolarsError> {
         let file_path = format!("examples/csv/{}_daily_ohlcv.csv", ticker);
         println!("Loading data from {}", file_path);
 
+        // Read first line to show raw data format
+        let df_peek = CsvReadOptions::default()
+            .with_has_header(false)
+            .with_n_rows(Some(1))
+            .try_into_reader_with_file_path(Some(file_path.clone().into()))?
+            .finish()?;
+
+        println!("Original columns: {:?}", df_peek.get_column_names());
+
+        // Now read the actual data with proper column names
         let df = CsvReadOptions::default()
-            .with_has_header(true)
+            .with_has_header(false)
             .try_into_reader_with_file_path(Some(file_path.into()))?
             .finish()?;
 
-        println!("Original columns: {:?}", df.get_column_names());
+        // Rename columns manually
+        let df = df
+            .clone()
+            .lazy()
+            .select([
+                col("column_1").alias("symbol"),
+                col("column_2").alias("date"),
+                col("column_3").alias("open"),
+                col("column_4").alias("high"),
+                col("column_5").alias("low"),
+                col("column_6").alias("close"),
+                col("column_7").cast(DataType::Float64).alias("volume"),
+                col("column_8").alias("adjusted"),
+            ])
+            .collect()?;
+
+        println!("Data shape: {} rows x {} columns", df.height(), df.width());
 
         // Handle column format differences by standardizing to lowercase
         let df = df
             .lazy()
             .select([
-                col("Symbol").alias("symbol"),
-                col("Timestamp").alias("date"),
-                col("Open").alias("open"),
-                col("High").alias("high"),
-                col("Low").alias("low"),
-                col("Close").alias("close"),
-                col("Volume").cast(DataType::Float64).alias("volume"),
+                col("symbol"),
+                col("date"),
+                col("open"),
+                col("high"),
+                col("low"),
+                col("close"),
+                col("volume"),
             ])
             .collect()?;
-
-        println!("Data shape: {} rows x {} columns", df.height(), df.width());
 
         // Calculate various technical indicators
         let sma_20 = calculate_sma(&df, "close", 20)?;
@@ -112,7 +136,11 @@ fn main() -> Result<(), PolarsError> {
         let last_idx = df.height().saturating_sub(1);
 
         // Get metrics before adding to DataFrame (to avoid ownership issues)
-        let rsi_latest = rsi_14.f64()?.get(last_idx).unwrap_or(0.0);
+        let rsi_latest = if last_idx < rsi_14.len() {
+            rsi_14.f64()?.get(last_idx).unwrap_or(0.0)
+        } else {
+            0.0
+        };
 
         let bb_width_avg = bb_width_series
             .f64()?
@@ -135,8 +163,18 @@ fn main() -> Result<(), PolarsError> {
 
         // Calculate OBV trend as percentage change
         let obv_ca = obv.f64()?;
-        let obv_start = obv_ca.get(start_idx).unwrap_or(0.0);
-        let obv_end = obv_ca.get(last_idx).unwrap_or(0.0);
+        let obv_start = if start_idx < obv_ca.len() {
+            obv_ca.get(start_idx).unwrap_or(0.0)
+        } else {
+            0.0
+        };
+
+        let obv_end = if last_idx < obv_ca.len() {
+            obv_ca.get(last_idx).unwrap_or(0.0)
+        } else {
+            0.0
+        };
+
         let obv_trend = if obv_start.abs() < 1e-10 {
             0.0
         } else {
@@ -156,7 +194,11 @@ fn main() -> Result<(), PolarsError> {
         // Print some key metrics for this stock
         println!(
             "Latest Close: ${:.2}",
-            close_ca.get(last_idx).unwrap_or(0.0)
+            if last_idx < close_ca.len() {
+                close_ca.get(last_idx).unwrap_or(0.0)
+            } else {
+                0.0
+            }
         );
         println!("Latest RSI: {:.2}", rsi_latest);
         println!("Avg Volatility: {:.2}%", avg_volatility);
@@ -165,18 +207,29 @@ fn main() -> Result<(), PolarsError> {
 
         // Create a new DataFrame with all indicators
         let mut df_with_indicators = df.clone();
-        df_with_indicators.with_column(sma_20.clone())?;
-        df_with_indicators.with_column(ema_20.clone())?;
-        df_with_indicators.with_column(rsi_14.clone())?;
-        df_with_indicators.with_column(atr_14.clone())?;
-        df_with_indicators.with_column(bb_mid.clone())?;
-        df_with_indicators.with_column(bb_upper.clone())?;
-        df_with_indicators.with_column(bb_lower.clone())?;
-        df_with_indicators.with_column(bb_width_series.clone())?;
-        df_with_indicators.with_column(volatility_series.clone())?;
-        df_with_indicators.with_column(obv.clone())?;
-        df_with_indicators.with_column(macd_line.clone())?;
-        df_with_indicators.with_column(macd_signal.clone())?;
+
+        // Helper function to add columns safely, without shape mismatch errors
+        let add_column_safely = |df: &mut DataFrame, series: Series| -> Result<(), PolarsError> {
+            // Only add the column if it has the same length as the DataFrame
+            if series.len() == df.height() {
+                df.with_column(series)?;
+            }
+            Ok(())
+        };
+
+        // Add columns safely
+        add_column_safely(&mut df_with_indicators, sma_20.clone())?;
+        add_column_safely(&mut df_with_indicators, ema_20.clone())?;
+        add_column_safely(&mut df_with_indicators, rsi_14.clone())?;
+        add_column_safely(&mut df_with_indicators, atr_14.clone())?;
+        add_column_safely(&mut df_with_indicators, bb_mid.clone())?;
+        add_column_safely(&mut df_with_indicators, bb_upper.clone())?;
+        add_column_safely(&mut df_with_indicators, bb_lower.clone())?;
+        add_column_safely(&mut df_with_indicators, bb_width_series.clone())?;
+        add_column_safely(&mut df_with_indicators, volatility_series.clone())?;
+        add_column_safely(&mut df_with_indicators, obv.clone())?;
+        add_column_safely(&mut df_with_indicators, macd_line.clone())?;
+        add_column_safely(&mut df_with_indicators, macd_signal.clone())?;
 
         // Save indicators to CSV for further analysis
         let output_path = format!("examples/csv/{}_indicators.csv", ticker);

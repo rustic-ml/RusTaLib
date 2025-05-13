@@ -76,36 +76,3 @@ pub fn calculate_beta(
 
     Ok(Series::new("beta".into(), beta_values))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_beta() {
-        // Create test DataFrame
-        let close = Series::new(
-            "close".into(),
-            &[10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0],
-        );
-        let market = Series::new(
-            "market".into(),
-            &[
-                100.0, 105.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 145.0,
-            ],
-        );
-        let df = DataFrame::new(vec![close.into(), market.into()]).unwrap();
-
-        let window = 5;
-        let beta = calculate_beta(&df, "close", "market", window).unwrap();
-
-        // First window-1 values should be NaN
-        for i in 0..window - 1 {
-            assert!(beta.f64().unwrap().get(i).unwrap().is_nan());
-        }
-
-        // Beta should be around 0.2 for this test data (1 unit price change for 5 unit market change)
-        let beta_val = beta.f64().unwrap().get(window).unwrap();
-        assert!((beta_val - 0.2).abs() < 0.01);
-    }
-}

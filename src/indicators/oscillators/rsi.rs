@@ -15,16 +15,16 @@ pub fn calculate_rsi(df: &DataFrame, window: usize, column: &str) -> PolarsResul
     // Check we have enough data
     if df.height() < window + 1 {
         return Err(PolarsError::ComputeError(
-            format!("Not enough data points for RSI calculation with window size {}", window).into(),
+            format!(
+                "Not enough data points for RSI calculation with window size {}",
+                window
+            )
+            .into(),
         ));
     }
 
     // Get price data
-    let close = df
-        .column(column)?
-        .f64()?
-        .clone()
-        .into_series();
+    let close = df.column(column)?.f64()?.clone().into_series();
 
     // Calculate price changes
     let prev_close = close.shift(1);

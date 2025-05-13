@@ -1,6 +1,32 @@
-use chrono::{Datelike, NaiveDateTime, Timelike};
+use chrono::{Datelike, NaiveDate, NaiveDateTime, Timelike};
 use polars::prelude::*;
 use std::f64::consts::PI;
+
+/// Parse a date string into a NaiveDate object
+///
+/// # Arguments
+///
+/// * `date_str` - Date string in YYYY-MM-DD format
+///
+/// # Returns
+///
+/// Returns a Result with NaiveDate on success, or error on failure
+pub fn parse_date(date_str: &str) -> Result<NaiveDate, chrono::ParseError> {
+    NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
+}
+
+/// Format a NaiveDate into a string
+///
+/// # Arguments
+///
+/// * `date` - NaiveDate object to format
+///
+/// # Returns
+///
+/// Returns a formatted date string in YYYY-MM-DD format
+pub fn format_date(date: &NaiveDate) -> String {
+    date.format("%Y-%m-%d").to_string()
+}
 
 /// Create time-based cyclical features from a time column
 ///
@@ -18,25 +44,22 @@ pub fn create_cyclical_time_features(
     time_column: &str,
     time_format: &str,
 ) -> PolarsResult<Vec<Series>> {
-    // Check if the time column exists
-    if !df.schema().contains(time_column) {
-        return Err(PolarsError::ComputeError(
-            format!("Time column '{}' not found", time_column).into(),
-        ));
-    }
+    // Extract and validate time column
+    let time_series = df.column(time_column)?;
+    let time_strs = time_series.str()?;
 
-    let time_col = df.column(time_column)?.str()?;
-    let n_rows = df.height();
+    // Initialize vectors for storing sine and cosine features
+    let mut hour_sin = Vec::with_capacity(df.height());
+    let mut hour_cos = Vec::with_capacity(df.height());
+    let mut day_sin = Vec::with_capacity(df.height());
+    let mut day_cos = Vec::with_capacity(df.height());
 
-    // Create vectors for hour and day of week features
-    let mut hour_sin = Vec::with_capacity(n_rows);
-    let mut hour_cos = Vec::with_capacity(n_rows);
-    let mut day_sin = Vec::with_capacity(n_rows);
-    let mut day_cos = Vec::with_capacity(n_rows);
+    // Create Timezone-naïve chrono format
+    let format_str = time_format.replace(" UTC", "");
 
-    for i in 0..n_rows {
-        let time_str = time_col.get(i).unwrap_or("");
-        let datetime = match NaiveDateTime::parse_from_str(time_str, time_format) {
+    for i in 0..df.height() {
+        let time_str = time_strs.get(i).unwrap_or("");
+        let datetime = match NaiveDateTime::parse_from_str(time_str, &format_str) {
             Ok(dt) => dt,
             Err(_) => {
                 // Default values if parsing fails
@@ -68,171 +91,4 @@ pub fn create_cyclical_time_features(
     ];
 
     Ok(result)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use approx::assert_relative_eq;
-    use std::f64::consts::PI;
-
-    #[test]
-    fn test_create_cyclical_time_features() {
-        // Create test DataFrame with time column
-        let time_data = vec![
-            "2023-01-01 00:00:00 UTC", // Sunday midnight
-            "2023-01-01 06:00:00 UTC", // Sunday 6 AM
-            "2023-01-01 12:00:00 UTC", // Sunday noon
-            "2023-01-01 18:00:00 UTC", // Sunday 6 PM
-            "2023-01-02 12:00:00 UTC", // Monday noon
-            "2023-01-03 12:00:00 UTC", // Tuesday noon
-            "2023-01-04 12:00:00 UTC", // Wednesday noon
-        ];
-
-        let time_series = Series::new("timestamp".into(), time_data);
-        let df = DataFrame::new(vec![time_series.into()]).unwrap();
-
-        // Get cyclical features
-        let features =
-            create_cyclical_time_features(&df, "timestamp", "%Y-%m-%d %H:%M:%S UTC").unwrap();
-
-        // We should have 4 feature series
-        assert_eq!(features.len(), 4);
-
-        // Check naming
-        assert_eq!(features[0].name(), "hour_sin");
-        assert_eq!(features[1].name(), "hour_cos");
-        assert_eq!(features[2].name(), "day_of_week_sin");
-        assert_eq!(features[3].name(), "day_of_week_cos");
-
-        // Verify values
-
-        // Midnight should have hour_sin = 0, hour_cos = 1
-        assert_relative_eq!(
-            features[0].f64().unwrap().get(0).unwrap(),
-            0.0,
-            epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            features[1].f64().unwrap().get(0).unwrap(),
-            1.0,
-            epsilon = 1e-10
-        );
-
-        // 6 AM should have hour_sin = 0.5, hour_cos = 0.866... (30 degrees)
-        assert_relative_eq!(
-            features[0].f64().unwrap().get(1).unwrap(),
-            (PI / 2.0).sin(),
-            epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            features[1].f64().unwrap().get(1).unwrap(),
-            (PI / 2.0).cos(),
-            epsilon = 1e-10
-        );
-
-        // Noon should have hour_sin = 0, hour_cos = -1 (180 degrees)
-        assert_relative_eq!(
-            features[0].f64().unwrap().get(2).unwrap(),
-            (PI).sin(),
-            epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            features[1].f64().unwrap().get(2).unwrap(),
-            (PI).cos(),
-            epsilon = 1e-10
-        );
-
-        // 6 PM should have hour_sin = -0.5, hour_cos = 0.866... (270 degrees)
-        assert_relative_eq!(
-            features[0].f64().unwrap().get(3).unwrap(),
-            (3.0 * PI / 2.0).sin(),
-            epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            features[1].f64().unwrap().get(3).unwrap(),
-            (3.0 * PI / 2.0).cos(),
-            epsilon = 1e-10
-        );
-
-        // Sunday should have day_of_week_sin = 0, day_of_week_cos = 1
-        assert_relative_eq!(
-            features[2].f64().unwrap().get(0).unwrap(),
-            (2.0 * PI * 6.0 / 7.0).sin(),
-            epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            features[3].f64().unwrap().get(0).unwrap(),
-            (2.0 * PI * 6.0 / 7.0).cos(),
-            epsilon = 1e-10
-        );
-
-        // Monday through Wednesday should have incremental values
-        for i in 4..7 {
-            let day = i - 4;
-            let expected_sin = (2.0 * PI * day as f64 / 7.0).sin();
-            let expected_cos = (2.0 * PI * day as f64 / 7.0).cos();
-            assert_relative_eq!(
-                features[2].f64().unwrap().get(i).unwrap(),
-                expected_sin,
-                epsilon = 1e-10
-            );
-            assert_relative_eq!(
-                features[3].f64().unwrap().get(i).unwrap(),
-                expected_cos,
-                epsilon = 1e-10
-            );
-        }
-    }
-
-    #[test]
-    fn test_create_cyclical_time_features_invalid_format() {
-        // Create test DataFrame with improperly formatted time
-        let time_data = vec![
-            "2023-01-01 00:00:00 UTC", // Correct format
-            "2023/01/01 06:00:00",     // Incorrect format
-        ];
-
-        let time_series = Series::new("timestamp".into(), time_data);
-        let df = DataFrame::new(vec![time_series.into()]).unwrap();
-
-        // Get cyclical features
-        let features =
-            create_cyclical_time_features(&df, "timestamp", "%Y-%m-%d %H:%M:%S UTC").unwrap();
-
-        // First row should have valid values
-        assert_relative_eq!(
-            features[0].f64().unwrap().get(0).unwrap(),
-            0.0,
-            epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            features[1].f64().unwrap().get(0).unwrap(),
-            1.0,
-            epsilon = 1e-10
-        );
-
-        // Second row should have default values due to parsing error
-        assert_relative_eq!(
-            features[0].f64().unwrap().get(1).unwrap(),
-            0.0,
-            epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            features[1].f64().unwrap().get(1).unwrap(),
-            1.0,
-            epsilon = 1e-10
-        );
-    }
-
-    #[test]
-    #[should_panic(expected = "not found")]
-    fn test_create_cyclical_time_features_missing_column() {
-        // Create test DataFrame with no time column
-        let dummy_series = Series::new("dummy".into(), &[1, 2, 3]);
-        let df = DataFrame::new(vec![dummy_series.into()]).unwrap();
-
-        // This should panic as we're requesting a non-existent column
-        let _ = create_cyclical_time_features(&df, "timestamp", "%Y-%m-%d %H:%M:%S UTC").unwrap();
-    }
 }

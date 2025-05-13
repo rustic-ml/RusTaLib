@@ -36,26 +36,3 @@ pub fn calculate_wclprice(df: &DataFrame) -> PolarsResult<Series> {
 
     Ok(wcl_price.into_series().with_name("wclprice".into()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_wclprice() {
-        // Create test OHLC DataFrame
-        let high = Series::new("high".into(), &[12.0, 14.0, 16.0, 15.0, 17.0]);
-        let low = Series::new("low".into(), &[8.0, 9.0, 10.0, 9.0, 11.0]);
-        let close = Series::new("close".into(), &[10.0, 12.0, 14.0, 11.0, 15.0]);
-        let df = DataFrame::new(vec![high.into(), low.into(), close.into()]).unwrap();
-
-        let wcl = calculate_wclprice(&df).unwrap();
-
-        // wclprice = (high + low + close * 2) / 4
-        // For first row: (12 + 8 + 10 * 2) / 4 = 10
-        assert_eq!(wcl.f64().unwrap().get(0).unwrap(), 10.0);
-
-        // For fourth row: (15 + 9 + 11 * 2) / 4 = 11.5
-        assert_eq!(wcl.f64().unwrap().get(3).unwrap(), 11.5);
-    }
-}

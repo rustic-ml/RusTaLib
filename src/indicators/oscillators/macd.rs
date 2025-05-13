@@ -72,7 +72,10 @@ pub fn calculate_macd(
     }
 
     let macd_name = format!("macd_{0}_{1}", fast_period, slow_period);
-    let signal_name = format!("macd_signal_{0}_{1}_{2}", fast_period, slow_period, signal_period);
+    let signal_name = format!(
+        "macd_signal_{0}_{1}_{2}",
+        fast_period, slow_period, signal_period
+    );
 
     Ok((
         macd.with_name(macd_name.into()),

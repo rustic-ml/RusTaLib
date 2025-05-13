@@ -93,4 +93,19 @@ pub use long_term::*;
 
 // Re-export commonly used functionality for convenient access
 pub use short_term::swing_detection;
-pub use long_term::trend_analysis; 
+pub use long_term::trend_analysis;
+
+mod breadth;
+pub use breadth::{calculate_advance_decline_line, calculate_trin, calculate_mcclellan_oscillator};
+
+mod relative_strength;
+pub use relative_strength::calculate_relative_strength;
+
+mod vwap_bands;
+pub use vwap_bands::calculate_vwap_bands;
+
+mod pairs_trading;
+pub use pairs_trading::calculate_pairs_zscore;
+
+mod patterns;
+pub use patterns::recognize_candlestick_patterns; 

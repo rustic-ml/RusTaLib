@@ -1,6 +1,6 @@
 # RusTalib, the Crustacean Financial Analyst 🦀
 
-Meet **Rustalib**, your steadfast crustacean companion for navigating the currents of financial markets! This comprehensive Rust library, `ta-lib-in-rust`, provides a powerful toolkit for calculating technical indicators and building trading strategies, all powered by the high-performance [Polars](https://pola.rs/) DataFrame library.
+Meet **Rustalib**, your steadfast crustacean companion for navigating the currents of financial markets! This comprehensive Rust library, `ta-lib-in-rust`, provides a powerful toolkit for calculating technical indicators, all powered by the high-performance [Polars](https://pola.rs/) DataFrame library.
 
 Whether you're charting, backtesting, or building live trading systems, Rustalib is here to help you process market data with speed and precision.
 
@@ -11,11 +11,11 @@ Whether you're charting, backtesting, or building live trading systems, Rustalib
 
 ## Project Overview
 
-**Technical Indicators** aims to provide a robust, extensible, and efficient toolkit for quantitative finance, algorithmic trading, and data science in Rust. The library is designed for:
+**ta-lib-in-rust** provides a robust, extensible, and efficient toolkit for quantitative finance, algorithmic trading, and data science in Rust. The library is designed for:
 - **Fast, vectorized computation** using Polars DataFrames
 - **Easy integration** with modern Rust data workflows
-- **Modular design**: Use only the indicators or strategies you need
-- **Extensibility**: Add your own indicators or strategies easily
+- **Modular design**: Use only the indicators you need
+- **Extensibility**: Add your own indicators easily
 
 Whether you are backtesting, researching, or building production trading systems, this crate offers a solid foundation for technical analysis in Rust.
 
@@ -24,7 +24,6 @@ Whether you are backtesting, researching, or building production trading systems
 ## Features
 
 - **Wide range of indicators**: Moving averages, oscillators, volatility, volume, trend, momentum, and more
-- **Strategy modules**: Combine indicators into rule-based trading strategies
 - **Convenience functions**: Add a suite of indicators to your DataFrame in one call
 - **CSV and DataFrame workflows**: Read, process, and save data efficiently
 - **Well-documented and tested**
@@ -37,51 +36,6 @@ Whether you are backtesting, researching, or building production trading systems
 - **Volume**: On-Balance Volume (OBV), Chaikin Money Flow (CMF)
 - **Other**: Price returns, daily range, lagged prices, rolling returns/volatility, cyclical time features
 
-### Planned/Upcoming
-- Average Directional Index (ADX)
-- Rate of Change (ROC)
-
----
-
-## Feature Selection
-
-This crate supports feature selection, allowing you to include only the parts you need:
-
-### Types of Features
-- **indicators**: Only include technical indicator calculations
-- **strategies**: Only include trading strategies
-- **all**: Include both indicators and strategies (default)
-
-### How to Choose Features in Cargo.toml
-
-You can enable features in your `Cargo.toml` like this:
-
-```toml
-[dependencies]
-ta-lib-in-rust = { version = "x.y.z", features = ["strategies"] } # Only strategies
-ta-lib-in-rust = { version = "x.y.z", features = ["indicators"] } # Only indicators
-ta-lib-in-rust = { version = "x.y.z", features = ["all"] }        # Everything (default)
-```
-
-If you omit the `features` key, the default is `all`.
-
-### Programmatic Feature Selection
-
-You can also select features at runtime using the `FeatureSelection` enum and `select_features` function:
-
-```rust
-use ta_lib_in_rust::{FeatureSelection, select_features};
-let mut df = ...; // your Polars DataFrame
-// To add only indicators:
-let result = select_features(&mut df, FeatureSelection::Indicators);
-// To run a strategy:
-let result = select_features(&mut df, FeatureSelection::Strategy { strategy_name: "daily_1", params: None });
-// To do both:
-let result = select_features(&mut df, FeatureSelection::All { strategy_name: "daily_1", params: None });
-```
-
-See the crate documentation for more details and examples.
-
 ---
 
 ## Installation
@@ -91,7 +45,6 @@ Add to your `Cargo.toml`:
 ```toml
 [dependencies]
 ta-lib-in-rust = "*" # Or specify a version
-tokio = { version = "1", features = ["full"] } # If using async examples
 polars = { version = "0.46", features = ["lazy", "dtype-full"] }
 ```
 
@@ -138,50 +91,7 @@ fn main() -> PolarsResult<()> {
 }
 ```
 
-### 3. Run a Strategy and Analyze Results
-```rust
-use polars::prelude::*;
-use ta_lib_in_rust::strategy::minute::enhanced_minute_strategy::{
-    run_strategy, calculate_performance, StrategyParams
-};
-
-fn main() -> PolarsResult<()> {
-    let df = CsvReadOptions::default()
-        .with_has_header(true)
-        .try_into_reader_with_file_path(Some("examples/AAPL_minute_ohlcv.csv".into()))?
-        .finish()?;
-    
-    // Note: This library expects lowercase column names (open, high, low, close, volume)
-    // If your CSV has uppercase names, you need to rename them:
-    let df = df.lazy()
-        .select([
-            col("Open").alias("open"),
-            col("High").alias("high"),
-            col("Low").alias("low"),
-            col("Close").alias("close"),
-            col("Volume").cast(DataType::Float64).alias("volume"),
-        ])
-        .collect()?;
-        
-    let params = StrategyParams::default();
-    let signals = run_strategy(&df, &params)?;
-    let (
-        final_value, total_return, num_trades, win_rate, max_drawdown, profit_factor, avg_profit_per_trade
-    ) = calculate_performance(
-        df.column("close")?,
-        &signals.buy_signals,
-        &signals.sell_signals,
-        &signals.stop_levels,
-        &signals.target_levels,
-        10000.0,
-        true,
-    );
-    println!("Final Value: ${:.2}, Total Return: {:.2}%", final_value, total_return);
-    Ok(())
-}
-```
-
-### 4. Reading Data from CSV and Saving Results
+### 3. Reading Data from CSV and Saving Results
 ```rust
 let df = CsvReadOptions::default()
     .with_has_header(true)
@@ -201,7 +111,7 @@ let mut df = df.lazy()
     ])
     .collect()?;
 
-// ... apply indicators or strategies ...
+// ... apply indicators ...
 CsvWriter::new(std::io::BufWriter::new(std::fs::File::create("results.csv")?))
     .finish(&mut df)?;
 ```
@@ -212,8 +122,8 @@ CsvWriter::new(std::io::BufWriter::new(std::fs::File::create("results.csv")?))
 
 See the [`examples/`](examples/) directory for:
 - **Basic indicator usage** (SMA, EMA, RSI, MACD, Bollinger Bands, etc.)
-- **Strategy backtests** (minute and daily)
 - **CSV workflows** for real-world data
+- **Multi-stock analysis** with cross-asset comparisons
 - **Saving and analyzing results**
 
 ## Important Notes
@@ -221,16 +131,13 @@ See the [`examples/`](examples/) directory for:
 ### Column Name Sensitivity
 This library expects lowercase column names (`open`, `high`, `low`, `close`, `volume`) in DataFrames. When working with CSVs that might have different case formats (e.g., `Open`, `High`, etc.), make sure to rename the columns using Polars' selection and aliasing capabilities as shown in the examples above.
 
-### Working with Multiple Stock Data Files
-The examples directory contains sample code for running strategies on multiple stocks (AAPL, GOOGL, MSFT). You can use these as templates for your own multi-asset analysis.
-
 ---
 
 ## Contributing
 
 Contributions are welcome! Please:
 - Open issues for bugs, questions, or feature requests
-- Submit pull requests for new indicators, strategies, or improvements
+- Submit pull requests for new indicators or improvements
 - Follow Rust best practices and add tests/docs for new code
 
 ---

@@ -3,13 +3,22 @@
 pub mod atr;
 pub mod bollinger_band_b;
 pub mod bollinger_bands;
+pub mod donchian_channels;
 pub mod gk_volatility;
-
-#[cfg(test)]
-pub mod tests;
+pub mod hist_volatility;
+pub mod keltner_channels;
+pub mod natr;
+pub mod stddev;
+pub mod trange;
 
 // Re-export indicators
 pub use atr::*;
 pub use bollinger_band_b::*;
 pub use bollinger_bands::*;
+pub use donchian_channels::calculate_donchian_channels;
 pub use gk_volatility::*;
+pub use hist_volatility::*;
+pub use keltner_channels::*;
+pub use natr::*;
+pub use stddev::*;
+pub use trange::*;

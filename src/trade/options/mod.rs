@@ -227,8 +227,8 @@ pub mod options_trading {
         
         // Create DataFrame with results
         let df = DataFrame::new(vec![
-            Series::new("price", price_points),
-            Series::new("pnl", pnl_values)
+            Series::new("price".into(), price_points).into(),
+            Series::new("pnl".into(), pnl_values).into()
         ])?;
         
         Ok(df)
@@ -253,6 +253,8 @@ mod greeks;
 mod spreads;
 mod volume_analysis;
 mod skew_analysis;
+mod sentiment;
+mod gamma_exposure;
 
 // Re-export the public functions
 pub use volatility_analysis::*;
@@ -260,6 +262,8 @@ pub use greeks::*;
 pub use spreads::*;
 pub use volume_analysis::*;
 pub use skew_analysis::*;
+pub use sentiment::{calculate_put_call_oi_ratio, calculate_skew_sentiment};
+pub use gamma_exposure::calculate_gamma_exposure;
 
 /// Calculate common options trading indicators
 ///
@@ -400,7 +404,7 @@ pub fn generate_options_trading_signals(df: &DataFrame) -> PolarsResult<Series> 
         }
     }
     
-    Ok(Series::new("options_trading_signal", combined_signals))
+    Ok(Series::new("options_trading_signal".into(), combined_signals))
 }
 
 /// Calculate optimal position sizing for options trades
@@ -492,5 +496,5 @@ pub fn calculate_options_position_sizing(
         position_sizes.push(contracts as i32);
     }
     
-    Ok(Series::new("suggested_contracts", position_sizes))
+    Ok(Series::new("suggested_contracts".into(), position_sizes))
 } 

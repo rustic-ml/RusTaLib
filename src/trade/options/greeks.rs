@@ -64,7 +64,7 @@ pub fn calculate_delta(
         delta_values[i] = delta;
     }
     
-    Ok(Series::new("delta", delta_values))
+    Ok(Series::new("delta".into(), delta_values))
 }
 
 /// Calculate gamma for options
@@ -116,7 +116,7 @@ pub fn calculate_gamma(
         gamma_values[i] = gamma;
     }
     
-    Ok(Series::new("gamma", gamma_values))
+    Ok(Series::new("gamma".into(), gamma_values))
 }
 
 /// Calculate theta for options
@@ -181,7 +181,7 @@ pub fn calculate_theta(
         theta_values[i] = theta / 365.0;
     }
     
-    Ok(Series::new("theta", theta_values))
+    Ok(Series::new("theta".into(), theta_values))
 }
 
 /// Calculate vega for options
@@ -237,7 +237,7 @@ pub fn calculate_vega(
         vega_values[i] = vega;
     }
     
-    Ok(Series::new("vega", vega_values))
+    Ok(Series::new("vega".into(), vega_values))
 }
 
 /// Calculate gamma exposure
@@ -280,7 +280,7 @@ pub fn calculate_gamma_exposure(
         gamma_exposure[i] = g * c as f64 * m;
     }
     
-    Ok(Series::new("gamma_exposure", gamma_exposure))
+    Ok(Series::new("gamma_exposure".into(), gamma_exposure))
 }
 
 /// Normal probability density function

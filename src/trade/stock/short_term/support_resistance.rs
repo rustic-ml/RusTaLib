@@ -85,45 +85,57 @@ pub fn identify_key_levels(
     
     // Cluster resistance levels
     for (_, price) in &swing_highs {
-        let mut found_cluster = false;
+        // Attempt to assign price to existing cluster or create new one
+        let mut assigned = false;
+        let mut target_cluster_id = 0;
         
-        for (cluster_id, prices) in &mut resistance_clusters {
-            let avg_price = prices.iter().sum::<f64>() / prices.len() as f64;
-            
-            // If price is within tolerance, add to this cluster
-            if (*price - avg_price).abs() / avg_price <= tolerance {
-                resistance_clusters.get_mut(cluster_id).unwrap().push(*price);
-                found_cluster = true;
+        for (cluster_id, prices) in &resistance_clusters {
+            // Check if price is close to cluster center
+            let cluster_avg = prices.iter().sum::<f64>() / prices.len() as f64;
+            if (price - cluster_avg).abs() < tolerance {
+                assigned = true;
+                target_cluster_id = *cluster_id;
                 break;
             }
         }
         
-        // If no matching cluster found, create a new one
-        if !found_cluster && !price.is_nan() {
-            resistance_clusters.insert(next_cluster_id, vec![*price]);
-            next_cluster_id += 1;
+        if assigned {
+            // Add price to existing cluster
+            if let Some(cluster) = resistance_clusters.get_mut(&target_cluster_id) {
+                cluster.push(*price);
+            }
+        } else {
+            // Create new cluster
+            let new_cluster_id = resistance_clusters.len();
+            resistance_clusters.insert(new_cluster_id, vec![*price]);
         }
     }
     
     // Cluster support levels
     for (_, price) in &swing_lows {
-        let mut found_cluster = false;
+        // Attempt to assign price to existing cluster or create new one
+        let mut assigned = false;
+        let mut target_cluster_id = 0;
         
-        for (cluster_id, prices) in &mut support_clusters {
-            let avg_price = prices.iter().sum::<f64>() / prices.len() as f64;
-            
-            // If price is within tolerance, add to this cluster
-            if (*price - avg_price).abs() / avg_price <= tolerance {
-                support_clusters.get_mut(cluster_id).unwrap().push(*price);
-                found_cluster = true;
+        for (cluster_id, prices) in &support_clusters {
+            // Check if price is close to cluster center
+            let cluster_avg = prices.iter().sum::<f64>() / prices.len() as f64;
+            if (price - cluster_avg).abs() < tolerance {
+                assigned = true;
+                target_cluster_id = *cluster_id;
                 break;
             }
         }
         
-        // If no matching cluster found, create a new one
-        if !found_cluster && !price.is_nan() {
-            support_clusters.insert(next_cluster_id, vec![*price]);
-            next_cluster_id += 1;
+        if assigned {
+            // Add price to existing cluster
+            if let Some(cluster) = support_clusters.get_mut(&target_cluster_id) {
+                cluster.push(*price);
+            }
+        } else {
+            // Create new cluster
+            let new_cluster_id = support_clusters.len();
+            support_clusters.insert(new_cluster_id, vec![*price]);
         }
     }
     
