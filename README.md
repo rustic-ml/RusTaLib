@@ -123,6 +123,7 @@ CsvWriter::new(std::io::BufWriter::new(std::fs::File::create("results.csv")?))
 See the [`examples/`](examples/) directory for:
 - **Basic indicator usage** (SMA, EMA, RSI, MACD, Bollinger Bands, etc.)
 - **CSV workflows** for real-world data
+- **Multi-stock analysis** with cross-asset comparisons
 - **Saving and analyzing results**
 
 ## Important Notes

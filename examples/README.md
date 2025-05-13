@@ -35,6 +35,12 @@ Options market specific trading strategies:
 - `options/volatility_strategies.rs` - Demonstrates volatility-based options strategies
 - `options/delta_neutral.rs` - Shows delta-neutral options strategies implementation
 
+## Multi-Asset Analysis Examples
+
+Examples for processing and analyzing multiple assets:
+
+- `working_with_multi_stock_data.rs` - Demonstrates how to load, process, and compare technical indicators across multiple stocks. Shows how to handle data from different CSV sources, standardize column formats, calculate key technical indicators, and perform cross-stock comparison analysis.
+
 ## Running the Examples
 
 To run any example, use the following command from the project root:
@@ -48,6 +54,7 @@ For instance:
 ```bash
 cargo run --example general/basic_indicators
 cargo run --example stock/trend_following
+cargo run --example working_with_multi_stock_data
 ```
 
 ## Notes for Real-World Application
