@@ -42,7 +42,7 @@ pub fn calculate_volume_oi_ratio(
         ratio[i] = vol / oi;
     }
     
-    Ok(Series::new("volume_oi_ratio", ratio))
+    Ok(Series::new("volume_oi_ratio".into(), ratio))
 }
 
 /// Calculate put-call volume ratio
@@ -113,7 +113,7 @@ pub fn calculate_put_call_ratio(
         }
     }
     
-    Ok(Series::new("put_call_ratio", put_call_ratio))
+    Ok(Series::new("put_call_ratio".into(), put_call_ratio))
 }
 
 /// Calculate unusual options activity indicator
@@ -163,7 +163,7 @@ pub fn calculate_unusual_activity(
         unusual_score[i] = volume_multiple * vol_oi_ratio;
     }
     
-    Ok(Series::new("unusual_activity", unusual_score))
+    Ok(Series::new("unusual_activity".into(), unusual_score))
 }
 
 /// Calculate open interest change
@@ -202,7 +202,7 @@ pub fn calculate_oi_change(
         oi_change[i] = (absolute_change / prev_oi) * 100.0;
     }
     
-    Ok(Series::new("oi_change_pct", oi_change))
+    Ok(Series::new("oi_change_pct".into(), oi_change))
 }
 
 /// Calculate money flow indicator for options
@@ -261,7 +261,7 @@ pub fn calculate_options_money_flow(
         money_flow[i] = dollar_value * direction;
     }
     
-    Ok(Series::new("options_money_flow", money_flow))
+    Ok(Series::new("options_money_flow".into(), money_flow))
 }
 
 /// Add all volume indicators to the DataFrame

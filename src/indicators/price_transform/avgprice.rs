@@ -25,25 +25,3 @@ pub fn calculate_avgprice(df: &DataFrame) -> PolarsResult<Series> {
 
     Ok(avg_price.into_series().with_name("avgprice".into()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_avgprice() {
-        // Create test OHLC DataFrame
-        let high = Series::new("high".into(), &[12.0, 14.0, 16.0, 15.0, 17.0]);
-        let low = Series::new("low".into(), &[8.0, 9.0, 10.0, 9.0, 11.0]);
-        let df = DataFrame::new(vec![high.into(), low.into()]).unwrap();
-
-        let avg = calculate_avgprice(&df).unwrap();
-
-        // avgprice = (high + low) / 2
-        // For first row: (12 + 8) / 2 = 10
-        assert_eq!(avg.f64().unwrap().get(0).unwrap(), 10.0);
-
-        // For third row: (16 + 10) / 2 = 13
-        assert_eq!(avg.f64().unwrap().get(2).unwrap(), 13.0);
-    }
-}

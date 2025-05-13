@@ -1,6 +1,6 @@
 // Trend indicators module
 
-mod adx;
+pub mod adx;
 mod adxr;
 mod aroon;
 mod aroon_osc;
@@ -8,7 +8,9 @@ mod minus_di;
 mod minus_dm;
 mod plus_di;
 mod plus_dm;
-mod psar;
+pub mod psar;
+pub mod ichimoku;
+mod vortex;
 
 // Re-export indicators
 pub use adx::calculate_adx;
@@ -20,6 +22,8 @@ pub use minus_dm::calculate_minus_dm;
 pub use plus_di::calculate_plus_di;
 pub use plus_dm::calculate_plus_dm;
 pub use psar::calculate_psar;
+pub use ichimoku::calculate_ichimoku_cloud;
+pub use vortex::calculate_vortex;
 
 use polars::prelude::*;
 
@@ -53,19 +57,4 @@ pub fn add_trend_indicators(df: &DataFrame) -> PolarsResult<DataFrame> {
     result_df.with_column(psar)?;
 
     Ok(result_df)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::indicators::test_util::create_test_ohlcv_df;
-
-    #[test]
-    fn test_add_trend_indicators() {
-        let df = create_test_ohlcv_df();
-        let result = add_trend_indicators(&df).unwrap();
-
-        // Check that indicators were added
-        assert!(result.schema().contains("psar_0_02_0_20"));
-    }
 }

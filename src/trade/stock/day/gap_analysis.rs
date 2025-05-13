@@ -137,9 +137,9 @@ pub fn analyze_price_gaps(
     }
     
     Ok((
-        Series::new("gap_size_pct", gap_size),
-        Series::new("gap_type", gap_type),
-        Series::new("gap_fill_pct", gap_fill_pct),
+        Series::new("gap_size_pct".into(), gap_size),
+        Series::new("gap_type".into(), gap_type),
+        Series::new("gap_fill_pct".into(), gap_fill_pct),
     ))
 }
 
@@ -187,7 +187,7 @@ pub fn add_gap_analysis(df: &mut DataFrame, price_threshold: Option<f64>) -> Pol
         }
     }
     
-    df.with_column(Series::new("gap_trade_signal", gap_fade_signal))?;
+    df.with_column(Series::new("gap_trade_signal".into(), gap_fade_signal))?;
     
     Ok(())
 }

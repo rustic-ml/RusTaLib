@@ -26,7 +26,7 @@ use polars::prelude::*;
 /// * `Result<Series, PolarsError>` - Series with oscillator values
 pub fn intraday_momentum_oscillator(
     df: &DataFrame,
-    period: usize,
+    _period: usize,
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let values = vec![50.0; df.height()];
@@ -48,7 +48,7 @@ pub fn intraday_momentum_oscillator(
 /// * `Result<Series, PolarsError>` - Series with imbalance values
 pub fn order_flow_imbalance(
     df: &DataFrame,
-    volume_weighted: bool,
+    _volume_weighted: bool,
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let values = vec![0.0; df.height()];
@@ -71,8 +71,8 @@ pub fn order_flow_imbalance(
 /// * `Result<Series, PolarsError>` - Series with breakout signals
 pub fn intraday_breakout_detector(
     df: &DataFrame,
-    consolidation_periods: usize,
-    volume_threshold: f64,
+    _consolidation_periods: usize,
+    _volume_threshold: f64,
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let signals = vec![false; df.height()];
@@ -106,4 +106,51 @@ pub fn price_velocities(
     }
     
     Ok(result)
+}
+
+/// Calculate intraday price levels based on pivot points
+///
+/// # Arguments
+///
+/// * `df` - DataFrame with OHLC data
+/// * `period` - Lookback period for pivot calculation
+pub fn calculate_pivot_levels(
+    df: &DataFrame,
+    _period: usize,
+) -> Result<Series, PolarsError> {
+    // Placeholder implementation
+    let values = vec![0.0; df.height()];
+    Ok(Series::new("pivot_levels".into(), values))
+}
+
+/// Calculate VWAP and standard deviation bands
+///
+/// # Arguments
+///
+/// * `df` - DataFrame with OHLCV data
+/// * `volume_weighted` - Whether to use volume weighting for bands
+pub fn calculate_vwap_bands(
+    df: &DataFrame,
+    _volume_weighted: bool,
+) -> Result<Series, PolarsError> {
+    // Placeholder implementation
+    let values = vec![0.0; df.height()];
+    Ok(Series::new("vwap_bands".into(), values))
+}
+
+/// Identify breakout areas in intraday charts
+///
+/// # Arguments
+///
+/// * `df` - DataFrame with OHLCV data
+/// * `consolidation_periods` - Number of periods to identify consolidation
+/// * `volume_threshold` - Volume threshold to confirm a breakout
+pub fn identify_intraday_breakouts(
+    df: &DataFrame,
+    _consolidation_periods: usize,
+    _volume_threshold: f64,
+) -> Result<Series, PolarsError> {
+    // Placeholder implementation
+    let signals = vec![false; df.height()];
+    Ok(Series::new("intraday_breakouts".into(), signals))
 } 

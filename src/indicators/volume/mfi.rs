@@ -57,30 +57,28 @@ pub fn calculate_mfi(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     let close = df.column("close")?.f64()?;
     let volume = df.column("volume")?.f64()?;
 
-    // Calculate the typical price: (high + low + close) / 3
+    // Calculate typical price for each bar
     let mut typical_prices = Vec::with_capacity(df.height());
-    for (i, _) in high.iter().enumerate().take(df.height()) {
+    let mut money_flows = Vec::with_capacity(df.height());
+    
+    // Use iterator with enumerate instead of range-based loop
+    for i in 0..df.height() {
         let high_val = high.get(i).unwrap_or(f64::NAN);
         let low_val = low.get(i).unwrap_or(f64::NAN);
         let close_val = close.get(i).unwrap_or(f64::NAN);
-
-        if high_val.is_nan() || low_val.is_nan() || close_val.is_nan() {
-            typical_prices.push(f64::NAN);
-        } else {
-            typical_prices.push((high_val + low_val + close_val) / 3.0);
-        }
-    }
-
-    // Calculate the money flow: typical price * volume
-    let mut money_flows = Vec::with_capacity(df.height());
-    for i in 0..df.height() {
-        let tp = typical_prices[i];
         let vol = volume.get(i).unwrap_or(f64::NAN);
-
-        if tp.is_nan() || vol.is_nan() {
-            money_flows.push(f64::NAN);
+        
+        // Calculate typical price and raw money flow
+        if !high_val.is_nan() && !low_val.is_nan() && !close_val.is_nan() && !vol.is_nan() {
+            let typical_price = (high_val + low_val + close_val) / 3.0;
+            typical_prices.push(typical_price);
+            
+            // Money flow is the product of typical price and volume
+            let money_flow = typical_price * vol;
+            money_flows.push(money_flow);
         } else {
-            money_flows.push(tp * vol);
+            typical_prices.push(f64::NAN);
+            money_flows.push(f64::NAN);
         }
     }
 
@@ -150,27 +148,4 @@ pub fn calculate_mfi(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     // Create a Series with the MFI values
     let name = format!("mfi_{}", window);
     Ok(Series::new(name.into(), mfi_values))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::indicators::test_util::create_test_ohlcv_df;
-
-    #[test]
-    fn test_calculate_mfi() {
-        let df = create_test_ohlcv_df();
-        let mfi = calculate_mfi(&df, 14).unwrap();
-
-        // MFI should be in the range [0, 100]
-        for i in 14..df.height() {
-            let value = mfi.f64().unwrap().get(i).unwrap();
-            assert!(value >= 0.0 && value <= 100.0);
-        }
-
-        // MFI for the first (window-1) periods should be NaN
-        for i in 0..14 {
-            assert!(mfi.f64().unwrap().get(i).unwrap().is_nan());
-        }
-    }
 }

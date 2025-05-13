@@ -95,13 +95,13 @@ pub fn calculate_vertical_spread_metrics(
         }
     }
     
-    // Create result DataFrame
+    // Compile metrics into a DataFrame
     let metrics = vec![
-        Series::new("max_profit", max_profit),
-        Series::new("max_loss", max_loss),
-        Series::new("breakeven", breakeven),
-        Series::new("risk_reward", risk_reward),
-        Series::new("strike_width", strike_width),
+        Series::new("max_profit".into(), max_profit).into(),
+        Series::new("max_loss".into(), max_loss).into(),
+        Series::new("breakeven".into(), breakeven).into(),
+        Series::new("risk_reward".into(), risk_reward).into(),
+        Series::new("strike_width".into(), strike_width).into(),
     ];
     
     DataFrame::new(metrics)
@@ -174,13 +174,13 @@ pub fn calculate_calendar_spread_metrics(
         }
     }
     
-    // Create result DataFrame
+    // Compile metrics into a DataFrame
     let metrics = vec![
-        Series::new("net_debit", net_debit),
-        Series::new("iv_skew", iv_skew),
-        Series::new("time_decay_advantage", time_decay_advantage),
-        Series::new("theta_ratio", theta_ratio),
-        Series::new("expiry_gap", expiry_gap),
+        Series::new("net_debit".into(), net_debit).into(),
+        Series::new("iv_skew".into(), iv_skew).into(),
+        Series::new("time_decay_advantage".into(), time_decay_advantage).into(),
+        Series::new("theta_ratio".into(), theta_ratio).into(),
+        Series::new("expiry_gap".into(), expiry_gap).into(),
     ];
     
     DataFrame::new(metrics)
@@ -281,16 +281,16 @@ pub fn calculate_iron_condor_metrics(
         }
     }
     
-    // Create result DataFrame
+    // Compile metrics into a DataFrame
     let metrics = vec![
-        Series::new("max_profit", max_profit),
-        Series::new("max_loss", max_loss),
-        Series::new("put_breakeven", put_breakeven),
-        Series::new("call_breakeven", call_breakeven),
-        Series::new("body_width", body_width),
-        Series::new("put_wing_width", put_wing_width),
-        Series::new("call_wing_width", call_wing_width),
-        Series::new("profit_probability", profit_probability),
+        Series::new("max_profit".into(), max_profit).into(),
+        Series::new("max_loss".into(), max_loss).into(),
+        Series::new("put_breakeven".into(), put_breakeven).into(),
+        Series::new("call_breakeven".into(), call_breakeven).into(),
+        Series::new("body_width".into(), body_width).into(),
+        Series::new("put_wing_width".into(), put_wing_width).into(),
+        Series::new("call_wing_width".into(), call_wing_width).into(),
+        Series::new("profit_probability".into(), profit_probability).into(),
     ];
     
     DataFrame::new(metrics)

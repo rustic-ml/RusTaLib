@@ -54,7 +54,7 @@ pub fn calculate_iv_percentile(
         iv_percentile[i] = 100.0 * (count_below as f64) / (iv_history.len() as f64);
     }
     
-    Ok(Series::new("iv_percentile", iv_percentile))
+    Ok(Series::new("iv_percentile".into(), iv_percentile))
 }
 
 /// Calculate implied volatility term structure
@@ -82,8 +82,9 @@ pub fn calculate_iv_term_structure(
     let mut expiry_days: HashMap<String, f64> = HashMap::new();
     
     for i in 0..df.height() {
-        if let Some(exp) = expiry.get(i) {
-            let exp_str = exp.to_string();
+        let exp_result = expiry.get(i);
+        if let Ok(exp_value) = exp_result {
+            let exp_str = exp_value.to_string();
             let iv_val = iv.get(i).unwrap_or(f64::NAN);
             
             if !iv_val.is_nan() {
@@ -129,7 +130,7 @@ pub fn calculate_iv_term_structure(
         }
     }
     
-    Ok(Series::new("iv_term_structure", term_structure))
+    Ok(Series::new("iv_term_structure".into(), term_structure))
 }
 
 /// Calculate implied volatility forecast
@@ -158,7 +159,7 @@ pub fn calculate_iv_forecast(
     
     // Need at least 30 data points for a reasonable forecast
     if len < 30 {
-        return Ok(Series::new("iv_forecast", iv_forecast));
+        return Ok(Series::new("iv_forecast".into(), iv_forecast));
     }
     
     // Calculate long-term average IV
@@ -175,7 +176,7 @@ pub fn calculate_iv_forecast(
     }
     
     if valid_iv_count == 0 {
-        return Ok(Series::new("iv_forecast", iv_forecast));
+        return Ok(Series::new("iv_forecast".into(), iv_forecast));
     }
     
     let long_term_iv = valid_iv_sum / valid_iv_count as f64;
@@ -192,7 +193,7 @@ pub fn calculate_iv_forecast(
         iv_forecast[i] = forecast;
     }
     
-    Ok(Series::new("iv_forecast", iv_forecast))
+    Ok(Series::new("iv_forecast".into(), iv_forecast))
 }
 
 /// Add all volatility indicators to the DataFrame

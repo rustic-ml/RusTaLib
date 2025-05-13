@@ -16,7 +16,7 @@ use crate::indicators::moving_averages::calculate_ema;
 use crate::indicators::oscillators::calculate_rsi;
 
 mod trend_strength;
-mod swing_detection;
+pub(crate) mod swing_detection;
 mod multi_timeframe;
 mod mean_reversion;
 mod support_resistance;
@@ -166,7 +166,7 @@ pub fn generate_swing_trading_signals(df: &DataFrame) -> PolarsResult<Series> {
         }
     }
     
-    Ok(Series::new("swing_trading_signal", combined_signals))
+    Ok(Series::new("swing_trading_signal".into(), combined_signals))
 }
 
 /// Calculate position sizing based on risk level
@@ -200,12 +200,12 @@ pub fn calculate_position_sizing(
         Ok(s) => s,
         Err(_) => {
             // If combined signals not available, check if at least swing signal exists
-            if !df.schema().contains("swing_signal") {
+            if !df.schema().contains("swing_signal".into()) {
                 return Err(PolarsError::ComputeError(
                     "No trading signals found for position sizing".into(),
                 ));
             }
-            df.column("swing_signal")?.clone()
+            df.column("swing_signal".into())?.as_series().clone()
         }
     };
     

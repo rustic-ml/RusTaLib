@@ -3,7 +3,6 @@
 //! This module provides indicators based on implied volatility analysis for options trading.
 
 use polars::prelude::*;
-use std::collections::HashMap;
 
 /// Implied Volatility Surface for analyzing IV patterns across strikes and expirations
 pub struct IVSurface {
@@ -34,18 +33,20 @@ impl Default for IVSurface {
 ///
 /// # Arguments
 ///
-/// * `options_chain` - DataFrame with options chain data including strikes and IV
-/// * `current_price` - Current price of the underlying asset
-/// * `delta_range` - Tuple of (min_delta, max_delta) to consider for skew calculation
+/// * `df` - DataFrame with price data
+/// * `options_chain` - DataFrame with options data
+/// * `current_price` - Current price of the underlying
+/// * `delta_range` - Range of delta values to include
 ///
 /// # Returns
 ///
-/// * `Result<f64, PolarsError>` - IV skew value (positive: put skew, negative: call skew)
+/// * `Result<Series, PolarsError>` - IV skew value (positive: put skew, negative: call skew)
 pub fn calculate_iv_skew(
-    options_chain: &DataFrame, 
-    current_price: f64,
-    delta_range: (f64, f64),
-) -> Result<f64, PolarsError> {
+    _df: &DataFrame,
+    _options_chain: &DataFrame, 
+    _current_price: f64,
+    _delta_range: (f64, f64),
+) -> Result<Series, PolarsError> {
     // In a real implementation, we would:
     // 1. Filter options to the specified delta range
     // 2. Group by puts vs calls
@@ -53,7 +54,7 @@ pub fn calculate_iv_skew(
     // 4. Return put_iv - call_iv
 
     // Placeholder implementation
-    Ok(0.15) // Example positive skew value
+    Ok(Series::new("iv_skew".into(), vec![0.15]))
 }
 
 /// Calculate implied volatility term structure
@@ -63,23 +64,26 @@ pub fn calculate_iv_skew(
 ///
 /// # Arguments
 ///
-/// * `options_chain` - DataFrame with options chain data including expirations and IV
-/// * `atm_delta` - Delta value to use for at-the-money options (typically ~0.50)
+/// * `df` - DataFrame with price data
+/// * `options_chain` - DataFrame with options data
+/// * `atm_delta` - Delta value for at-the-money options
 ///
 /// # Returns
 ///
-/// * `Result<HashMap<u64, f64>, PolarsError>` - Map of days to expiration to IV
-pub fn calculate_iv_term_structure(
-    options_chain: &DataFrame,
-    atm_delta: f64,
-) -> Result<HashMap<u64, f64>, PolarsError> {
+/// * `Result<Series, PolarsError>` - Series of IV values for different expirations
+pub fn term_structure_analysis(
+    _df: &DataFrame,
+    _options_chain: &DataFrame,
+    _atm_delta: f64,
+) -> Result<Series, PolarsError> {
     // Placeholder implementation
-    let mut term_structure = HashMap::new();
-    term_structure.insert(30, 0.25);  // 30 DTE: 25% IV
-    term_structure.insert(60, 0.23);  // 60 DTE: 23% IV
-    term_structure.insert(90, 0.22);  // 90 DTE: 22% IV
+    let term_structure = vec![
+        0.25,  // 30 DTE: 25% IV
+        0.23,  // 60 DTE: 23% IV
+        0.22   // 90 DTE: 22% IV
+    ];
     
-    Ok(term_structure)
+    Ok(Series::new("iv_term_structure".into(), term_structure))
 }
 
 /// Calculate IV rank and percentile
@@ -146,25 +150,21 @@ pub fn calculate_iv_rank_percentile(current_iv: f64, historical_iv: &Series) -> 
 ///
 /// # Arguments
 ///
-/// * `price_df` - DataFrame with price data for the underlying
-/// * `iv_series` - Series with implied volatility data
-/// * `iv_percentile_threshold` - IV percentile threshold for signal generation
+/// * `df` - DataFrame with price data
+/// * `iv_series` - Series with historical implied volatility
+/// * `iv_percentile_threshold` - Threshold for high and low IV percentile
 ///
 /// # Returns
 ///
-/// * `Result<(Series, Series), PolarsError>` - Tuple of (buy signals, sell signals)
-pub fn iv_based_signals(
-    price_df: &DataFrame,
-    iv_series: &Series,
-    iv_percentile_threshold: f64,
-) -> Result<(Series, Series), PolarsError> {
+/// * `Result<Series, PolarsError>` - Series of buy/sell signals
+pub fn implied_volatility_regime(
+    df: &DataFrame,
+    _iv_series: &Series,
+    _iv_percentile_threshold: f64,
+) -> Result<Series, PolarsError> {
     // Placeholder implementation
-    let rows = price_df.height();
-    let buy_signals = vec![false; rows];
-    let sell_signals = vec![false; rows];
+    let rows = df.height();
+    let signals = vec![false; rows];
     
-    Ok((
-        Series::new("iv_buy_signals".into(), buy_signals),
-        Series::new("iv_sell_signals".into(), sell_signals),
-    ))
+    Ok(Series::new("iv_signals".into(), signals))
 } 

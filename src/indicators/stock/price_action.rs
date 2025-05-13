@@ -57,7 +57,7 @@ pub fn detect_stock_breakouts(
     let vol_window_size = 20.min(df.height());
     
     // Skip initial rows where we don't have enough data
-    for i in 0..vol_window_size {
+    for _i in 0..vol_window_size {
         breakout_signals.push(false);
     }
     
@@ -119,7 +119,35 @@ pub fn detect_stock_breakouts(
 /// * `Result<(Series, Series), PolarsError>` - Tuple of buying and selling pressure series
 pub fn detect_institutional_activity(
     df: &DataFrame,
-    block_threshold: f64,
+    _block_threshold: f64,
+) -> Result<(Series, Series), PolarsError> {
+    // Implementation to be completed
+    let buying_pressure = Series::new("institutional_buying".into(), vec![0.0; df.height()]);
+    let selling_pressure = Series::new("institutional_selling".into(), vec![0.0; df.height()]);
+    
+    Ok((buying_pressure, selling_pressure))
+}
+
+/// Detect supply and demand blocks in a stock based on volume analysis
+///
+/// This function identifies potential supply and demand blocks in a stock
+/// by analyzing volume patterns and block trades.
+///
+/// # Arguments
+///
+/// * `df` - DataFrame with OHLCV data
+/// * `window_size` - Size of the window to analyze
+/// * `vol_threshold` - Volume threshold to consider as a block trade
+/// * `block_threshold` - Volume threshold to consider as a block trade
+///
+/// # Returns
+///
+/// * `Result<(Series, Series), PolarsError>` - Tuple of buying and selling pressure series
+pub fn detect_supply_demand_blocks(
+    df: &DataFrame,
+    _window_size: usize,
+    _vol_threshold: f64,
+    _block_threshold: f64,
 ) -> Result<(Series, Series), PolarsError> {
     // Implementation to be completed
     let buying_pressure = Series::new("institutional_buying".into(), vec![0.0; df.height()]);

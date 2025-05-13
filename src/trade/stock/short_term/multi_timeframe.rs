@@ -98,11 +98,11 @@ fn create_higher_timeframe(
     
     // Create aggregated DataFrame
     DataFrame::new(vec![
-        Series::new("open", agg_open),
-        Series::new("high", agg_high),
-        Series::new("low", agg_low),
-        Series::new("close", agg_close),
-        Series::new("volume", agg_volume),
+        Series::new("open".into(), agg_open).into(),
+        Series::new("high".into(), agg_high).into(),
+        Series::new("low".into(), agg_low).into(),
+        Series::new("close".into(), agg_close).into(),
+        Series::new("volume".into(), agg_volume).into(),
     ])
 }
 
@@ -197,7 +197,7 @@ pub fn calculate_multi_timeframe_alignment(
         }
     }
     
-    Ok(Series::new("multi_timeframe_alignment", alignment))
+    Ok(Series::new("multi_timeframe_alignment".into(), alignment))
 }
 
 /// Helper function to detect trend direction
@@ -371,7 +371,7 @@ pub fn calculate_multi_timeframe_rsi_divergence(
         divergence_signals.push(0);
     }
     
-    Ok(Series::new("multi_tf_rsi_divergence", divergence_signals))
+    Ok(Series::new("multi_tf_rsi_divergence".into(), divergence_signals))
 }
 
 /// Add multi-timeframe analysis to DataFrame

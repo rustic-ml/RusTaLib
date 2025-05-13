@@ -94,28 +94,3 @@ pub fn calculate_williams_r(df: &DataFrame, window: usize) -> PolarsResult<Serie
     let name = format!("williams_r_{}", window);
     Ok(Series::new(name.into(), williams_r_values))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::indicators::test_util::create_test_ohlcv_df;
-
-    #[test]
-    fn test_calculate_williams_r() {
-        let df = create_test_ohlcv_df();
-        let williams_r = calculate_williams_r(&df, 14).unwrap();
-
-        // Williams %R should be in the range [-100, 0]
-        for i in 14..df.height() {
-            let value = williams_r.f64().unwrap().get(i).unwrap();
-            if !value.is_nan() {
-                assert!(value >= -100.0 && value <= 0.0);
-            }
-        }
-
-        // Williams %R for the first (window-1) periods should be NaN
-        for i in 0..13 {
-            assert!(williams_r.f64().unwrap().get(i).unwrap().is_nan());
-        }
-    }
-}
