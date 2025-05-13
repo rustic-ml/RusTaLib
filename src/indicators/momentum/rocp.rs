@@ -35,4 +35,4 @@ pub fn calculate_rocp(df: &DataFrame, window: usize, column: &str) -> PolarsResu
     }
 
     Ok(Series::new("rocp".into(), rocp_values))
-} 
+}

@@ -62,19 +62,20 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     // Calculate Money Flow Multiplier for each period
     let mut money_flow_multipliers = Vec::with_capacity(df.height());
     let mut money_flow_volumes = Vec::with_capacity(df.height());
-    
+
     // Use standard for loop with index
     for i in 0..df.height() {
         let high_val = high.get(i).unwrap_or(f64::NAN);
         let low_val = low.get(i).unwrap_or(f64::NAN);
         let close_val = close.get(i).unwrap_or(f64::NAN);
         let vol = volume.get(i).unwrap_or(f64::NAN);
-        
+
         // Calculate money flow multiplier only if all values are valid
         if !high_val.is_nan() && !low_val.is_nan() && !close_val.is_nan() && high_val != low_val {
-            let money_flow_multiplier = ((close_val - low_val) - (high_val - close_val)) / (high_val - low_val);
+            let money_flow_multiplier =
+                ((close_val - low_val) - (high_val - close_val)) / (high_val - low_val);
             money_flow_multipliers.push(money_flow_multiplier);
-            
+
             // Money flow volume is the product of money flow multiplier and volume
             let money_flow_volume = money_flow_multiplier * vol;
             money_flow_volumes.push(money_flow_volume);
@@ -83,32 +84,31 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
             money_flow_volumes.push(f64::NAN);
         }
     }
-    
+
     // Calculate CMF using a sliding window
     let mut cmf_values = Vec::with_capacity(df.height());
-    
+
     for i in 0..df.height() {
         if i < window - 1 {
             cmf_values.push(f64::NAN);
             continue;
         }
-        
+
         // Calculate the sum of money flow volumes in the window
         let mut sum_money_flow_volume = 0.0;
         let mut sum_volume = 0.0;
-        
+
         // Use an iterator-based approach as suggested by Clippy
         let window_start = i - (window - 1);
-        for idx in window_start..=i {
-            let money_flow_vol = money_flow_volumes[idx];
+        for (idx, money_flow_vol) in money_flow_volumes.iter().enumerate().skip(window_start).take(window) {
             let vol = volume.get(idx).unwrap_or(f64::NAN);
-            
+
             if !money_flow_vol.is_nan() && !vol.is_nan() {
                 sum_money_flow_volume += money_flow_vol;
                 sum_volume += vol;
             }
         }
-        
+
         // Calculate CMF as the ratio of sum of money flow volumes to sum of volume
         if sum_volume > 0.0 {
             cmf_values.push(sum_money_flow_volume / sum_volume);
@@ -116,7 +116,7 @@ pub fn calculate_cmf(df: &DataFrame, window: usize) -> PolarsResult<Series> {
             cmf_values.push(f64::NAN);
         }
     }
-    
+
     // Return the CMF as a Polars Series
     Ok(Series::new(format!("cmf_{}", window).into(), cmf_values))
 }

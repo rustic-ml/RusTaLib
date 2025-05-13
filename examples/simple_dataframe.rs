@@ -10,8 +10,12 @@ fn main() -> Result<(), PolarsError> {
     let df = DataFrame::new(vec![dates.clone().into(), values.clone().into()])?;
 
     // Print information
-    println!("DataFrame created with {} rows and {} columns", df.height(), df.width());
+    println!(
+        "DataFrame created with {} rows and {} columns",
+        df.height(),
+        df.width()
+    );
     println!("{}", df);
 
     Ok(())
-} 
+}

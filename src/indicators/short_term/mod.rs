@@ -1,10 +1,10 @@
 //! # Short-Term Trading Indicators
-//! 
+//!
 //! This module provides indicators optimized for short-term trading with
 //! a timeframe of days to weeks, suitable for swing trading approaches.
-//! 
+//!
 //! ## Types of Indicators
-//! 
+//!
 //! - Swing trading momentum indicators
 //! - Short-term trend identification tools
 //! - Pattern recognition for multi-day setups
@@ -25,10 +25,7 @@ use polars::prelude::*;
 /// # Returns
 ///
 /// * `Result<Series, PolarsError>` - Series with swing strength values
-pub fn swing_strength_index(
-    df: &DataFrame,
-    _period: usize,
-) -> Result<Series, PolarsError> {
+pub fn swing_strength_index(df: &DataFrame, _period: usize) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let values = vec![0.0; df.height()];
     Ok(Series::new("swing_strength".into(), values))
@@ -115,10 +112,7 @@ pub fn multi_day_pattern_detector(
 ///
 /// * `df` - DataFrame with OHLC data
 /// * `period` - Lookback period for range calculation
-pub fn calculate_average_range(
-    df: &DataFrame,
-    _period: usize,
-) -> Result<Series, PolarsError> {
+pub fn calculate_average_range(df: &DataFrame, _period: usize) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let values = vec![0.0; df.height()];
     Ok(Series::new("average_range".into(), values))
@@ -173,4 +167,4 @@ pub fn detect_chart_patterns(
     // Placeholder implementation
     let values = vec![0.0; price_df.height()];
     Ok(Series::new("chart_patterns".into(), values))
-} 
+}

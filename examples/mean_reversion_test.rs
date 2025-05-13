@@ -7,9 +7,16 @@ fn main() -> Result<(), PolarsError> {
     println!("==================\n");
 
     // Create simple data
-    let dates = Series::new("date".into(), &[
-        "2023-01-01", "2023-01-02", "2023-01-03", "2023-01-04", "2023-01-05",
-    ]);
+    let dates = Series::new(
+        "date".into(),
+        &[
+            "2023-01-01",
+            "2023-01-02",
+            "2023-01-03",
+            "2023-01-04",
+            "2023-01-05",
+        ],
+    );
 
     let values = Series::new("value".into(), &[10.0, 11.0, 12.0, 13.0, 14.0]);
 
@@ -26,7 +33,7 @@ fn main() -> Result<(), PolarsError> {
     // Create a new column by doubling the values
     let values_f64 = values.f64()?;
     let mut doubles = Vec::with_capacity(values_f64.len());
-    
+
     for i in 0..values_f64.len() {
         if let Some(val) = values_f64.get(i) {
             doubles.push(val * 2.0);
@@ -34,7 +41,7 @@ fn main() -> Result<(), PolarsError> {
             doubles.push(f64::NAN);
         }
     }
-    
+
     let doubles_series = Series::new("doubles".into(), doubles);
 
     // Add the new column
@@ -43,4 +50,4 @@ fn main() -> Result<(), PolarsError> {
     println!("{}", df);
 
     Ok(())
-} 
+}

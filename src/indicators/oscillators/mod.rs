@@ -3,26 +3,26 @@
 use polars::prelude::*;
 
 // Module declarations
-pub mod macd;
-pub mod rsi;
-pub mod stochastic;
-pub mod williams_r;
-pub mod ultimate_oscillator;
-pub mod trix;
 pub mod dpo;
+pub mod macd;
 pub mod ppo;
+pub mod rsi;
 pub mod stoch_rsi;
+pub mod stochastic;
+pub mod trix;
+pub mod ultimate_oscillator;
+pub mod williams_r;
 
 // Re-export functions
-pub use macd::calculate_macd;
-pub use rsi::calculate_rsi;
-pub use stochastic::calculate_stochastic;
-pub use williams_r::calculate_williams_r;
-pub use ultimate_oscillator::calculate_ultimate_oscillator;
-pub use trix::calculate_trix;
 pub use dpo::calculate_dpo;
+pub use macd::calculate_macd;
 pub use ppo::calculate_ppo;
+pub use rsi::calculate_rsi;
 pub use stoch_rsi::calculate_stoch_rsi;
+pub use stochastic::calculate_stochastic;
+pub use trix::calculate_trix;
+pub use ultimate_oscillator::calculate_ultimate_oscillator;
+pub use williams_r::calculate_williams_r;
 
 /// Add oscillator indicators to a DataFrame
 ///

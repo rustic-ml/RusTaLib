@@ -1,10 +1,10 @@
 //! # Long-Term Trading Indicators
-//! 
+//!
 //! This module provides indicators optimized for long-term trading and investing,
 //! focusing on weekly to monthly timeframes and longer-term market cycles.
-//! 
+//!
 //! ## Types of Indicators
-//! 
+//!
 //! - Secular trend identification
 //! - Cyclical market analysis
 //! - Long-term sentiment and valuation metrics
@@ -78,7 +78,7 @@ pub fn long_term_valuation_metrics(
     _metrics: &[String],
 ) -> Result<DataFrame, PolarsError> {
     // Placeholder implementation - create a simple DataFrame with empty metrics
-    
+
     // Use the df! macro for easier DataFrame creation
     df! {
         "date" => (0..price_df.height()).map(|_| chrono::Utc::now().timestamp()).collect::<Vec<i64>>(),
@@ -220,4 +220,4 @@ pub fn identify_support_resistance(
     // Placeholder implementation - create a simple Series with support/resistance levels
     let values = vec![0.0; 5]; // Assuming 5 levels
     Ok(Series::new("support_resistance".into(), values))
-} 
+}

@@ -60,19 +60,19 @@ pub fn calculate_mfi(df: &DataFrame, window: usize) -> PolarsResult<Series> {
     // Calculate typical price for each bar
     let mut typical_prices = Vec::with_capacity(df.height());
     let mut money_flows = Vec::with_capacity(df.height());
-    
+
     // Use iterator with enumerate instead of range-based loop
     for i in 0..df.height() {
         let high_val = high.get(i).unwrap_or(f64::NAN);
         let low_val = low.get(i).unwrap_or(f64::NAN);
         let close_val = close.get(i).unwrap_or(f64::NAN);
         let vol = volume.get(i).unwrap_or(f64::NAN);
-        
+
         // Calculate typical price and raw money flow
         if !high_val.is_nan() && !low_val.is_nan() && !close_val.is_nan() && !vol.is_nan() {
             let typical_price = (high_val + low_val + close_val) / 3.0;
             typical_prices.push(typical_price);
-            
+
             // Money flow is the product of typical price and volume
             let money_flow = typical_price * vol;
             money_flows.push(money_flow);

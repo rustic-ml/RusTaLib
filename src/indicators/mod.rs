@@ -1,7 +1,7 @@
 //! # Technical Indicators
 //!
 //! This module provides technical indicators organized in multiple ways:
-//! 
+//!
 //! 1. By asset class - specialized indicators optimized for specific markets
 //! 2. By indicator type - traditional categorization of technical indicators
 //! 3. By timeframe - indicators optimized for different trading timeframes
@@ -32,30 +32,30 @@
 //! - [`long_term`](long_term/index.html): Indicators optimized for long-term analysis (weeks to months)
 
 // Asset-specific indicator modules
-pub mod stock;
 pub mod options;
+pub mod stock;
 
 // Traditional indicator category modules
+pub mod cycle;
+pub mod math;
+pub mod momentum;
 pub mod moving_averages;
 pub mod oscillators;
-pub mod volatility;
-pub mod volume;
-pub mod trend;
-pub mod momentum;
-pub mod cycle;
 pub mod pattern_recognition;
 pub mod price_transform;
 pub mod stats;
-pub mod math;
+pub mod trend;
+pub mod volatility;
+pub mod volume;
 
 // Timeframe-specific indicator modules
 pub mod day_trading;
-pub mod short_term;
 pub mod long_term;
+pub mod short_term;
 
 // Utility modules
-pub mod test_util;
 pub mod add_indicators;
+pub mod test_util;
 
 // Re-export add_technical_indicators function
 pub use add_indicators::add_technical_indicators;
@@ -68,7 +68,7 @@ pub use volatility::{calculate_atr, calculate_bollinger_bands};
 pub use volume::{calculate_cmf, calculate_mfi, calculate_obv};
 
 // Re-export asset-specific indicator modules
-pub use stock::price_action;
-pub use stock::fundamental;
-pub use options::implied_volatility;
 pub use options::greeks;
+pub use options::implied_volatility;
+pub use stock::fundamental;
+pub use stock::price_action;

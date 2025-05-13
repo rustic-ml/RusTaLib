@@ -1,5 +1,5 @@
 //! # Stock Fundamental Indicators
-//! 
+//!
 //! This module provides indicators that combine fundamental data with technical analysis
 //! for stock/equity markets.
 
@@ -9,10 +9,10 @@ use polars::prelude::*;
 pub struct FundamentalIndicators {
     /// Lookback period for earnings analysis
     pub earnings_lookback_quarters: usize,
-    
+
     /// Minimum earnings growth rate considered positive
     pub earnings_growth_threshold: f64,
-    
+
     /// Lookback period for PEG ratio calculation
     pub peg_calc_years: usize,
 }
@@ -52,7 +52,7 @@ pub fn peg_ratio_with_technical_trigger(
     // 1. Calculate PEG ratios from fundamental_df
     // 2. Detect uptrends from price_df
     // 3. Generate signals where PEG < max_peg && in_uptrend_for >= min_uptrend_days
-    
+
     // For now, we'll return a placeholder series
     let signals = vec![false; price_df.height()];
     Ok(Series::new("peg_buy_signals".into(), signals))
@@ -135,7 +135,10 @@ pub fn earnings_surprise_impact(
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let impact_scores = vec![0.0; df.height()];
-    Ok(Series::new("earnings_surprise_impact".into(), impact_scores))
+    Ok(Series::new(
+        "earnings_surprise_impact".into(),
+        impact_scores,
+    ))
 }
 
 /// # Arguments
@@ -150,5 +153,8 @@ pub fn value_stock_screening(
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let screening_scores = vec![0.0; df.height()];
-    Ok(Series::new("value_stock_screening".into(), screening_scores))
-} 
+    Ok(Series::new(
+        "value_stock_screening".into(),
+        screening_scores,
+    ))
+}

@@ -34,4 +34,4 @@ pub fn calculate_mom(df: &DataFrame, window: usize, column: &str) -> PolarsResul
     }
 
     Ok(Series::new("momentum".into(), mom_values))
-} 
+}

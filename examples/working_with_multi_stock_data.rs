@@ -41,9 +41,9 @@ fn main() -> Result<(), PolarsError> {
             .with_n_rows(Some(1))
             .try_into_reader_with_file_path(Some(file_path.clone().into()))?
             .finish()?;
-        
+
         println!("Original columns: {:?}", df_peek.get_column_names());
-        
+
         // Now read the actual data with proper column names
         let df = CsvReadOptions::default()
             .with_has_header(false)
@@ -51,7 +51,9 @@ fn main() -> Result<(), PolarsError> {
             .finish()?;
 
         // Rename columns manually
-        let df = df.clone().lazy()
+        let df = df
+            .clone()
+            .lazy()
             .select([
                 col("column_1").alias("symbol"),
                 col("column_2").alias("date"),
@@ -166,13 +168,13 @@ fn main() -> Result<(), PolarsError> {
         } else {
             0.0
         };
-        
+
         let obv_end = if last_idx < obv_ca.len() {
             obv_ca.get(last_idx).unwrap_or(0.0)
         } else {
             0.0
         };
-        
+
         let obv_trend = if obv_start.abs() < 1e-10 {
             0.0
         } else {
@@ -205,7 +207,7 @@ fn main() -> Result<(), PolarsError> {
 
         // Create a new DataFrame with all indicators
         let mut df_with_indicators = df.clone();
-        
+
         // Helper function to add columns safely, without shape mismatch errors
         let add_column_safely = |df: &mut DataFrame, series: Series| -> Result<(), PolarsError> {
             // Only add the column if it has the same length as the DataFrame
@@ -214,7 +216,7 @@ fn main() -> Result<(), PolarsError> {
             }
             Ok(())
         };
-        
+
         // Add columns safely
         add_column_safely(&mut df_with_indicators, sma_20.clone())?;
         add_column_safely(&mut df_with_indicators, ema_20.clone())?;

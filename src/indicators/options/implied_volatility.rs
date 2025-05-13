@@ -1,5 +1,5 @@
 //! # Implied Volatility Indicators
-//! 
+//!
 //! This module provides indicators based on implied volatility analysis for options trading.
 
 use polars::prelude::*;
@@ -8,10 +8,10 @@ use polars::prelude::*;
 pub struct IVSurface {
     /// Minimum number of strikes required to construct a valid IV skew
     pub min_strikes_for_skew: usize,
-    
+
     /// Minimum number of expirations required to construct a valid term structure
     pub min_expirations_for_term: usize,
-    
+
     /// Historical percentile window for IV rank calculation
     pub iv_rank_window_days: usize,
 }
@@ -43,7 +43,7 @@ impl Default for IVSurface {
 /// * `Result<Series, PolarsError>` - IV skew value (positive: put skew, negative: call skew)
 pub fn calculate_iv_skew(
     _df: &DataFrame,
-    _options_chain: &DataFrame, 
+    _options_chain: &DataFrame,
     _current_price: f64,
     _delta_range: (f64, f64),
 ) -> Result<Series, PolarsError> {
@@ -78,11 +78,11 @@ pub fn term_structure_analysis(
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
     let term_structure = vec![
-        0.25,  // 30 DTE: 25% IV
-        0.23,  // 60 DTE: 23% IV
-        0.22   // 90 DTE: 22% IV
+        0.25, // 30 DTE: 25% IV
+        0.23, // 60 DTE: 23% IV
+        0.22, // 90 DTE: 22% IV
     ];
-    
+
     Ok(Series::new("iv_term_structure".into(), term_structure))
 }
 
@@ -110,36 +110,36 @@ pub fn calculate_iv_rank_percentile(current_iv: f64, historical_iv: &Series) -> 
             }
         }
     }
-    
+
     // Initialize calculation variables
     let mut min_iv = f64::MAX;
     let mut max_iv = f64::MIN;
     let mut count_below = 0;
     let total_values = values.len();
-    
+
     // Process all values to find min, max, and count values below current_iv
     for &val in &values {
         min_iv = min_iv.min(val);
         max_iv = max_iv.max(val);
-        
+
         if val < current_iv {
             count_below += 1;
         }
     }
-    
+
     // Calculate IV rank and percentile
     let iv_rank = if max_iv > min_iv {
         (current_iv - min_iv) / (max_iv - min_iv)
     } else {
         0.5 // Default if there's no range
     };
-    
+
     let iv_percentile = if total_values > 0 {
         count_below as f64 / total_values as f64
     } else {
         0.5 // Default if no historical data
     };
-    
+
     (iv_rank, iv_percentile)
 }
 
@@ -165,6 +165,6 @@ pub fn implied_volatility_regime(
     // Placeholder implementation
     let rows = df.height();
     let signals = vec![false; rows];
-    
+
     Ok(Series::new("iv_signals".into(), signals))
-} 
+}

@@ -1,5 +1,5 @@
 //! # Option Greeks Indicators
-//! 
+//!
 //! This module provides functions for calculating and analyzing option Greeks
 //! to generate trading signals and risk metrics.
 
@@ -10,10 +10,10 @@ use std::collections::HashMap;
 pub struct GreeksCalculator {
     /// Risk-free interest rate used in pricing models
     pub risk_free_rate: f64,
-    
+
     /// Dividend yield of the underlying asset
     pub _dividend_yield: f64,
-    
+
     /// Model to use for pricing (e.g., "black_scholes", "binomial", "monte_carlo")
     pub pricing_model: String,
 }
@@ -22,7 +22,7 @@ impl Default for GreeksCalculator {
     fn default() -> Self {
         Self {
             risk_free_rate: 0.02, // 2%
-            _dividend_yield: 0.0,  // 0%
+            _dividend_yield: 0.0, // 0%
             pricing_model: "black_scholes".to_string(),
         }
     }
@@ -57,13 +57,13 @@ pub fn calculate_option_greeks(
 ) -> HashMap<String, f64> {
     // For a real implementation, we would calculate these using Black-Scholes
     // or another option pricing model. This is a simplified placeholder.
-    
+
     let mut greeks = HashMap::new();
-    
+
     // Simplified calculations (not accurate but reasonable approximations for demo)
     let time_sqrt = time_to_expiry.sqrt();
     let moneyness = spot_price / strike_price;
-    
+
     // Delta: simplified approximation based on moneyness and time
     let delta = if is_call {
         0.5 + 0.5 * (moneyness - 1.0) / (volatility * time_sqrt)
@@ -71,27 +71,34 @@ pub fn calculate_option_greeks(
         0.5 - 0.5 * (moneyness - 1.0) / (volatility * time_sqrt)
     };
     greeks.insert("delta".to_string(), delta.clamp(0.0, 1.0));
-    
+
     // Gamma: highest at-the-money
-    let gamma = (1.0 / (spot_price * volatility * time_sqrt * 2.5066)) * 
-        (-((spot_price.ln() - strike_price.ln()).powi(2)) / 
-        (2.0 * volatility.powi(2) * time_to_expiry)).exp();
+    let gamma = (1.0 / (spot_price * volatility * time_sqrt * 2.5066))
+        * (-((spot_price.ln() - strike_price.ln()).powi(2))
+            / (2.0 * volatility.powi(2) * time_to_expiry))
+            .exp();
     greeks.insert("gamma".to_string(), gamma);
-    
+
     // Theta: time decay, higher for options near expiration
-    let theta = -spot_price * volatility * 
-        (-((spot_price.ln() - strike_price.ln()).powi(2)) / 
-        (2.0 * volatility.powi(2) * time_to_expiry)).exp() / 
-        (2.0 * time_sqrt * 2.5066) / 365.0;
+    let theta = -spot_price
+        * volatility
+        * (-((spot_price.ln() - strike_price.ln()).powi(2))
+            / (2.0 * volatility.powi(2) * time_to_expiry))
+            .exp()
+        / (2.0 * time_sqrt * 2.5066)
+        / 365.0;
     greeks.insert("theta".to_string(), theta);
-    
+
     // Vega: sensitivity to volatility changes
-    let vega = spot_price * time_sqrt * 
-        (-((spot_price.ln() - strike_price.ln()).powi(2)) / 
-        (2.0 * volatility.powi(2) * time_to_expiry)).exp() / 
-        2.5066 / 100.0;
+    let vega = spot_price
+        * time_sqrt
+        * (-((spot_price.ln() - strike_price.ln()).powi(2))
+            / (2.0 * volatility.powi(2) * time_to_expiry))
+            .exp()
+        / 2.5066
+        / 100.0;
     greeks.insert("vega".to_string(), vega);
-    
+
     // Rho: sensitivity to interest rate changes
     let rho = if is_call {
         strike_price * time_to_expiry * (-risk_free_rate * time_to_expiry).exp() / 100.0
@@ -99,7 +106,7 @@ pub fn calculate_option_greeks(
         -strike_price * time_to_expiry * (-risk_free_rate * time_to_expiry).exp() / 100.0
     };
     greeks.insert("rho".to_string(), rho);
-    
+
     greeks
 }
 
@@ -120,9 +127,9 @@ pub fn delta_based_signals(
     options_df: &DataFrame,
     _delta_thresholds: (f64, f64),
 ) -> Result<Series, PolarsError> {
-    // In a real implementation, we would analyze the deltas across different 
+    // In a real implementation, we would analyze the deltas across different
     // strikes and expirations to determine bullish/bearish sentiment
-    
+
     // Placeholder implementation
     let signals = vec![0i32; options_df.height()];
     Ok(Series::new("delta_signals".into(), signals))
@@ -150,19 +157,22 @@ pub fn calculate_gamma_exposure(
     // Placeholder implementation
     let (min_price, max_price) = price_range;
     let step_size = (max_price - min_price) / (price_steps as f64);
-    
+
     let mut price_levels = Vec::with_capacity(price_steps);
     let mut gamma_values = Vec::with_capacity(price_steps);
-    
+
     for i in 0..price_steps {
         let price = min_price + step_size * (i as f64);
         price_levels.push(price);
-        
+
         // Placeholder gamma calculation
-        let gamma = (-(price - ((min_price + max_price) / 2.0)).powi(2) / (max_price - min_price).powi(2) * 10.0).exp();
+        let gamma = (-(price - ((min_price + max_price) / 2.0)).powi(2)
+            / (max_price - min_price).powi(2)
+            * 10.0)
+            .exp();
         gamma_values.push(gamma);
     }
-    
+
     // Create DataFrame with price levels and gamma exposure using df! macro
     df! {
         "price_level" => price_levels,
@@ -210,7 +220,10 @@ pub fn calculate_historical_volatility(
     _dividend_yield: f64,
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
-    Ok(Series::new("historical_volatility".into(), vec![0.0; price_df.height()]))
+    Ok(Series::new(
+        "historical_volatility".into(),
+        vec![0.0; price_df.height()],
+    ))
 }
 
 /// Find options strikes with specific delta values
@@ -226,7 +239,10 @@ pub fn find_strikes_by_delta(
     _delta_thresholds: (f64, f64),
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
-    Ok(Series::new("strikes_by_delta".into(), vec![0.0; price_df.height()]))
+    Ok(Series::new(
+        "strikes_by_delta".into(),
+        vec![0.0; price_df.height()],
+    ))
 }
 
 /// Screen for options with certain characteristics
@@ -242,7 +258,10 @@ pub fn options_screening(
     _options_df: &DataFrame,
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
-    Ok(Series::new("options_screening".into(), vec![0.0; price_df.height()]))
+    Ok(Series::new(
+        "options_screening".into(),
+        vec![0.0; price_df.height()],
+    ))
 }
 
 /// Identify high IV - high premium opportunities
@@ -262,5 +281,8 @@ pub fn high_iv_premium_options(
     _max_days_to_expiry: usize,
 ) -> Result<Series, PolarsError> {
     // Placeholder implementation
-    Ok(Series::new("high_iv_premium_options".into(), vec![0.0; price_df.height()]))
-} 
+    Ok(Series::new(
+        "high_iv_premium_options".into(),
+        vec![0.0; price_df.height()],
+    ))
+}

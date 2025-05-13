@@ -1,7 +1,7 @@
 use polars::prelude::*;
-use std::path::Path;
 use std::collections::HashMap;
 use std::fs::File;
+use std::path::Path;
 
 /// Structure to hold standardized financial data column names
 #[derive(Debug, Clone)]
@@ -40,17 +40,13 @@ pub fn read_csv<P: AsRef<Path>>(
     delimiter: char,
 ) -> PolarsResult<DataFrame> {
     let file = File::open(file_path)?;
-    
+
     // Create CSV reader with options
     let csv_options = CsvReadOptions::default()
         .with_has_header(has_header)
-        .map_parse_options(|opts| {
-            opts.with_separator(delimiter as u8)
-        });
-    
-    CsvReader::new(file)
-        .with_options(csv_options)
-        .finish()
+        .map_parse_options(|opts| opts.with_separator(delimiter as u8));
+
+    CsvReader::new(file).with_options(csv_options).finish()
 }
 
 /// Read a CSV file into a DataFrame with default settings (has header and comma delimiter)
@@ -126,7 +122,7 @@ pub fn read_financial_data<P: AsRef<Path>>(
         "parquet" => read_parquet(file_path)?,
         _ => return Err(PolarsError::ComputeError("Unsupported file type".into())),
     };
-    
+
     // Map the columns
     let columns = if has_header {
         map_columns_with_headers(&df)?
@@ -134,17 +130,18 @@ pub fn read_financial_data<P: AsRef<Path>>(
         // For files without headers, generate column names and then map them
         rename_columns_without_headers(&mut df)?
     };
-    
+
     Ok((df, columns))
 }
 
 /// Maps column names for files with headers
 fn map_columns_with_headers(df: &DataFrame) -> PolarsResult<FinancialColumns> {
-    let column_names: Vec<String> = df.get_column_names()
+    let column_names: Vec<String> = df
+        .get_column_names()
         .into_iter()
         .map(|s| s.to_string())
         .collect();
-    
+
     // Create mappings of common financial column names
     let mut financial_columns = FinancialColumns {
         date: None,
@@ -154,7 +151,7 @@ fn map_columns_with_headers(df: &DataFrame) -> PolarsResult<FinancialColumns> {
         close: None,
         volume: None,
     };
-    
+
     // Common variations of column names
     let date_variations = ["date", "time", "datetime", "timestamp"];
     let open_variations = ["open", "o", "opening"];
@@ -162,25 +159,37 @@ fn map_columns_with_headers(df: &DataFrame) -> PolarsResult<FinancialColumns> {
     let low_variations = ["low", "l", "lowest"];
     let close_variations = ["close", "c", "closing"];
     let volume_variations = ["volume", "vol", "v"];
-    
+
     for col in column_names {
         let lower_col = col.to_lowercase();
-        
-        if financial_columns.date.is_none() && date_variations.iter().any(|&v| lower_col.contains(v)) {
+
+        if financial_columns.date.is_none()
+            && date_variations.iter().any(|&v| lower_col.contains(v))
+        {
             financial_columns.date = Some(col.clone());
-        } else if financial_columns.open.is_none() && open_variations.iter().any(|&v| lower_col.contains(v)) {
+        } else if financial_columns.open.is_none()
+            && open_variations.iter().any(|&v| lower_col.contains(v))
+        {
             financial_columns.open = Some(col.clone());
-        } else if financial_columns.high.is_none() && high_variations.iter().any(|&v| lower_col.contains(v)) {
+        } else if financial_columns.high.is_none()
+            && high_variations.iter().any(|&v| lower_col.contains(v))
+        {
             financial_columns.high = Some(col.clone());
-        } else if financial_columns.low.is_none() && low_variations.iter().any(|&v| lower_col.contains(v)) {
+        } else if financial_columns.low.is_none()
+            && low_variations.iter().any(|&v| lower_col.contains(v))
+        {
             financial_columns.low = Some(col.clone());
-        } else if financial_columns.close.is_none() && close_variations.iter().any(|&v| lower_col.contains(v)) {
+        } else if financial_columns.close.is_none()
+            && close_variations.iter().any(|&v| lower_col.contains(v))
+        {
             financial_columns.close = Some(col.clone());
-        } else if financial_columns.volume.is_none() && volume_variations.iter().any(|&v| lower_col.contains(v)) {
+        } else if financial_columns.volume.is_none()
+            && volume_variations.iter().any(|&v| lower_col.contains(v))
+        {
             financial_columns.volume = Some(col.clone());
         }
     }
-    
+
     Ok(financial_columns)
 }
 
@@ -188,15 +197,15 @@ fn map_columns_with_headers(df: &DataFrame) -> PolarsResult<FinancialColumns> {
 fn rename_columns_without_headers(df: &mut DataFrame) -> PolarsResult<FinancialColumns> {
     let n_cols = df.width();
     let mut col_names = Vec::with_capacity(n_cols);
-    
+
     // Basic column renaming
     for i in 0..n_cols {
         col_names.push(format!("col_{}", i));
     }
-    
+
     // Rename the columns from col_0, col_1, etc.
     df.set_column_names(&col_names)?;
-    
+
     // Try to identify financial columns through data patterns
     let mut financial_columns = FinancialColumns {
         date: None,
@@ -206,33 +215,36 @@ fn rename_columns_without_headers(df: &mut DataFrame) -> PolarsResult<FinancialC
         close: None,
         volume: None,
     };
-    
+
     // If 5+ columns, assume typical OHLCV structure (date, open, high, low, close, volume)
     if n_cols >= 5 {
         // Check each column to see if it might contain date information
         for (i, name) in col_names.iter().enumerate() {
             if let Ok(series) = df.column(name) {
-                if i == 0 && (series.dtype() == &DataType::String || 
-                              series.dtype() == &DataType::Date || 
-                              matches!(series.dtype(), DataType::Datetime(_, _))) {
+                if i == 0
+                    && (series.dtype() == &DataType::String
+                        || series.dtype() == &DataType::Date
+                        || matches!(series.dtype(), DataType::Datetime(_, _)))
+                {
                     financial_columns.date = Some(name.clone());
                     continue;
                 }
-                
+
                 // Skip if we've identified this as a date column
                 if Some(name.clone()) == financial_columns.date {
                     continue;
                 }
-                
+
                 // Now analyze numerical columns
                 if series.dtype().is_primitive_numeric() {
                     // Get basic stats for this column
                     if let Some(stats) = series.clone().cast(&DataType::Float64)?.f64()?.mean() {
                         // Volume is typically much larger than price and often close to integers
-                        if financial_columns.volume.is_none() && 
-                           (stats > 1000.0 || 
-                            series.dtype() == &DataType::Int64 || 
-                            series.dtype() == &DataType::UInt64) {
+                        if financial_columns.volume.is_none()
+                            && (stats > 1000.0
+                                || series.dtype() == &DataType::Int64
+                                || series.dtype() == &DataType::UInt64)
+                        {
                             financial_columns.volume = Some(name.clone());
                             continue;
                         }
@@ -240,14 +252,17 @@ fn rename_columns_without_headers(df: &mut DataFrame) -> PolarsResult<FinancialC
                 }
             }
         }
-        
+
         // Now identify remaining columns if we have at least 4 price columns
-        let price_cols: Vec<String> = col_names.iter()
-            .filter(|&name| Some(name.clone()) != financial_columns.date && 
-                           Some(name.clone()) != financial_columns.volume)
+        let price_cols: Vec<String> = col_names
+            .iter()
+            .filter(|&name| {
+                Some(name.clone()) != financial_columns.date
+                    && Some(name.clone()) != financial_columns.volume
+            })
             .cloned()
             .collect();
-        
+
         // Simple heuristic mapping
         if price_cols.len() >= 4 {
             financial_columns.open = Some(price_cols[0].clone());
@@ -255,19 +270,19 @@ fn rename_columns_without_headers(df: &mut DataFrame) -> PolarsResult<FinancialC
             financial_columns.low = Some(price_cols[2].clone());
             financial_columns.close = Some(price_cols[3].clone());
         }
-        
+
         // For typical 6-column format (date, open, high, low, close, volume)
         if n_cols == 6 && financial_columns.date.is_some() && financial_columns.volume.is_none() {
             // Last column is likely volume if not identified
             financial_columns.volume = Some(col_names[5].clone());
         }
-        
+
         // If we still haven't identified the price columns, try to use statistics
         if financial_columns.high.is_none() || financial_columns.low.is_none() {
             identify_price_columns_by_statistics(df, &mut financial_columns, &price_cols)?;
         }
     }
-    
+
     Ok(financial_columns)
 }
 
@@ -279,17 +294,17 @@ fn identify_price_columns_by_statistics(
 ) -> PolarsResult<()> {
     // Track min and max values by column
     let mut col_stats: HashMap<String, (f64, f64)> = HashMap::new(); // (min, max)
-    
+
     for col_name in price_cols {
         if let Ok(series) = df.column(col_name) {
             if series.dtype().is_primitive_numeric() {
                 let f64_series = series.clone().cast(&DataType::Float64)?;
-                
+
                 // Use proper Series methods with f64() to get ChunkedArray<Float64Type>
                 if let Ok(f64_chunked) = f64_series.f64() {
                     let min_val = f64_chunked.min();
                     let max_val = f64_chunked.max();
-                    
+
                     if let (Some(min), Some(max)) = (min_val, max_val) {
                         col_stats.insert(col_name.clone(), (min, max));
                     }
@@ -297,7 +312,7 @@ fn identify_price_columns_by_statistics(
             }
         }
     }
-    
+
     // Find column with highest max values (likely high)
     let mut high_col = None;
     let mut high_val = f64::MIN;
@@ -307,7 +322,7 @@ fn identify_price_columns_by_statistics(
             high_col = Some(col.clone());
         }
     }
-    
+
     // Find column with lowest min values (likely low)
     let mut low_col = None;
     let mut low_val = f64::MAX;
@@ -317,14 +332,15 @@ fn identify_price_columns_by_statistics(
             low_col = Some(col.clone());
         }
     }
-    
+
     // Assign remaining columns to open and close if they haven't been assigned
     if price_cols.len() >= 4 {
-        let remaining_cols: Vec<String> = price_cols.iter()
+        let remaining_cols: Vec<String> = price_cols
+            .iter()
             .filter(|&col| Some(col.clone()) != high_col && Some(col.clone()) != low_col)
             .cloned()
             .collect();
-        
+
         if remaining_cols.len() >= 2 {
             if financial_columns.open.is_none() {
                 financial_columns.open = Some(remaining_cols[0].clone());
@@ -334,7 +350,7 @@ fn identify_price_columns_by_statistics(
             }
         }
     }
-    
+
     // Set high and low if they were identified and not already set
     if financial_columns.high.is_none() && high_col.is_some() {
         financial_columns.high = high_col;
@@ -342,6 +358,6 @@ fn identify_price_columns_by_statistics(
     if financial_columns.low.is_none() && low_col.is_some() {
         financial_columns.low = low_col;
     }
-    
+
     Ok(())
-} 
+}

@@ -3,19 +3,19 @@
 use polars::prelude::*;
 
 // Modules for volume indicators
+mod adl;
 mod cmf;
+mod eom;
 mod mfi;
 mod obv;
-mod adl;
-mod eom;
 mod pvt;
 
 // Re-export volume indicators
+pub use adl::calculate_adl;
 pub use cmf::calculate_cmf;
+pub use eom::calculate_eom;
 pub use mfi::calculate_mfi;
 pub use obv::calculate_obv;
-pub use adl::calculate_adl;
-pub use eom::calculate_eom;
 pub use pvt::calculate_pvt;
 
 /// Add volume-based indicators to a DataFrame
