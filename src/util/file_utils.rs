@@ -1,6 +1,6 @@
 use polars::prelude::*;
-use std::collections::HashMap;
 use std::fs::File;
+use std::io::BufRead;
 use std::path::Path;
 
 /// Structure to hold standardized financial data column names
@@ -87,15 +87,21 @@ pub fn read_parquet<P: AsRef<Path>>(file_path: P) -> PolarsResult<DataFrame> {
 
 /// Read a financial data file (CSV or Parquet) and standardize column names
 ///
-/// This function attempts to identify and standardize OHLCV columns whether or not
-/// the file has headers.
+/// This function automatically detects and handles various aspects of financial data files:
+/// - File type (CSV or Parquet) is detected from the file extension
+/// - For CSV files:
+///   - Automatically detects if the file has headers by checking for common financial column names
+///   - Tries multiple common delimiters (comma, semicolon, tab, pipe) until successful
+/// - For Parquet files:
+///   - Directly reads the file as Parquet format is self-describing
+///
+/// The function attempts to identify and standardize OHLCV (Open, High, Low, Close, Volume) columns
+/// whether or not the file has headers. It handles various common column name variations and
+/// automatically maps them to standardized names.
 ///
 /// # Arguments
 ///
-/// * `file_path` - Path to the file
-/// * `has_header` - Whether the file has headers
-/// * `file_type` - "csv" or "parquet"
-/// * `delimiter` - Delimiter for CSV files (default: ',')
+/// * `file_path` - Path to the file (must have .csv or .parquet extension)
 ///
 /// # Returns
 ///
@@ -107,30 +113,96 @@ pub fn read_parquet<P: AsRef<Path>>(file_path: P) -> PolarsResult<DataFrame> {
 /// ```
 /// use ta_lib_in_rust::util::file_utils::read_financial_data;
 ///
-/// let (df, columns) = read_financial_data("data/prices.csv", true, "csv", ',').unwrap();
+/// // Read a CSV file - automatically detects headers and delimiter
+/// let (df, columns) = read_financial_data("data/prices.csv").unwrap();
 /// println!("Close column: {:?}", columns.close);
+///
+/// // Read a Parquet file
+/// let (df, columns) = read_financial_data("data/prices.parquet").unwrap();
+/// println!("Volume column: {:?}", columns.volume);
 /// ```
+///
+/// # Supported File Types
+///
+/// - CSV files (`.csv` extension)
+///   - Automatically detects headers
+///   - Supports multiple delimiters: comma (,), semicolon (;), tab (\t), pipe (|)
+/// - Parquet files (`.parquet` extension)
+///
+/// # Error Handling
+///
+/// The function will return an error if:
+/// - The file extension is not supported
+/// - The file cannot be read
+/// - No valid delimiter is found for CSV files
+/// - The file format is invalid
 pub fn read_financial_data<P: AsRef<Path>>(
     file_path: P,
-    has_header: bool,
-    file_type: &str,
-    delimiter: char,
 ) -> PolarsResult<(DataFrame, FinancialColumns)> {
+    let path = file_path.as_ref();
+
+    // Detect file type from extension
+    let file_type = path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.to_lowercase())
+        .ok_or_else(|| {
+            PolarsError::ComputeError("Could not determine file type from extension".into())
+        })?;
+
     // Read the data file
-    let mut df = match file_type.to_lowercase().as_str() {
-        "csv" => read_csv(file_path, has_header, delimiter)?,
-        "parquet" => read_parquet(file_path)?,
-        _ => return Err(PolarsError::ComputeError("Unsupported file type".into())),
+    let df = match file_type.as_str() {
+        "csv" => {
+            // Try to detect if file has headers by reading first line
+            let file = File::open(path)?;
+            let mut reader = std::io::BufReader::new(file);
+            let mut first_line = String::new();
+            reader.read_line(&mut first_line)?;
+
+            // Check if first line looks like headers (contains common column names)
+            let has_header = ["date", "time", "open", "high", "low", "close", "volume"]
+                .iter()
+                .any(|&name| first_line.to_lowercase().contains(name));
+
+            // Try different delimiters
+            let delimiters = [',', ';', '\t', '|'];
+            let mut last_error = None;
+
+            for &delimiter in &delimiters {
+                match read_csv(path, has_header, delimiter) {
+                    Ok(df) => return process_dataframe(df, has_header),
+                    Err(e) => last_error = Some(e),
+                }
+            }
+
+            // If all delimiters failed, return the last error
+            Err(last_error.unwrap_or_else(|| {
+                PolarsError::ComputeError("Failed to read CSV with any common delimiter".into())
+            }))?
+        }
+        "parquet" => read_parquet(path)?,
+        _ => {
+            return Err(PolarsError::ComputeError(
+                format!("Unsupported file type: {}", file_type).into(),
+            ))
+        }
     };
 
     // Map the columns
+    let columns = map_columns_with_headers(&df)?;
+    Ok((df, columns))
+}
+
+/// Helper function to process the DataFrame and map columns
+fn process_dataframe(
+    mut df: DataFrame,
+    has_header: bool,
+) -> PolarsResult<(DataFrame, FinancialColumns)> {
     let columns = if has_header {
         map_columns_with_headers(&df)?
     } else {
-        // For files without headers, generate column names and then map them
         rename_columns_without_headers(&mut df)?
     };
-
     Ok((df, columns))
 }
 
@@ -153,7 +225,7 @@ fn map_columns_with_headers(df: &DataFrame) -> PolarsResult<FinancialColumns> {
     };
 
     // Common variations of column names
-    let date_variations = ["date", "time", "datetime", "timestamp"];
+    let date_variations = ["date", "time", "datetime", "timestamp", "dt"];
     let open_variations = ["open", "o", "opening"];
     let high_variations = ["high", "h", "highest"];
     let low_variations = ["low", "l", "lowest"];
@@ -196,17 +268,10 @@ fn map_columns_with_headers(df: &DataFrame) -> PolarsResult<FinancialColumns> {
 /// For files without headers, rename columns and identify OHLCV columns
 fn rename_columns_without_headers(df: &mut DataFrame) -> PolarsResult<FinancialColumns> {
     let n_cols = df.width();
-    let mut col_names = Vec::with_capacity(n_cols);
+    let mut col_names = vec![String::new(); n_cols];
+    let mut identified_cols = vec![false; n_cols];
 
-    // Basic column renaming
-    for i in 0..n_cols {
-        col_names.push(format!("col_{}", i));
-    }
-
-    // Rename the columns from col_0, col_1, etc.
-    df.set_column_names(&col_names)?;
-
-    // Try to identify financial columns through data patterns
+    // Initialize financial columns structure
     let mut financial_columns = FinancialColumns {
         date: None,
         open: None,
@@ -216,148 +281,159 @@ fn rename_columns_without_headers(df: &mut DataFrame) -> PolarsResult<FinancialC
         volume: None,
     };
 
-    // If 5+ columns, assume typical OHLCV structure (date, open, high, low, close, volume)
-    if n_cols >= 5 {
-        // Check each column to see if it might contain date information
-        for (i, name) in col_names.iter().enumerate() {
-            if let Ok(series) = df.column(name) {
-                if i == 0
-                    && (series.dtype() == &DataType::String
-                        || series.dtype() == &DataType::Date
-                        || matches!(series.dtype(), DataType::Datetime(_, _)))
-                {
-                    financial_columns.date = Some(name.clone());
-                    continue;
-                }
+    // First pass: identify date column (usually first column)
+    for i in 0..n_cols {
+        if let Some(series) = df.select_at_idx(i) {
+            if !identified_cols[i]
+                && (series.dtype() == &DataType::String
+                    || series.dtype() == &DataType::Date
+                    || matches!(series.dtype(), DataType::Datetime(_, _)))
+            {
+                col_names[i] = "date".to_string();
+                financial_columns.date = Some("date".to_string());
+                identified_cols[i] = true;
+                break; // Only identify one date column
+            }
+        }
+    }
 
-                // Skip if we've identified this as a date column
-                if Some(name.clone()) == financial_columns.date {
-                    continue;
-                }
+    // Second pass: identify volume column
+    // Look for integer columns or columns with significantly larger values
+    for (i, &identified) in identified_cols.iter().enumerate().take(n_cols) {
+        if identified {
+            continue;
+        }
 
-                // Now analyze numerical columns
-                if series.dtype().is_primitive_numeric() {
-                    // Get basic stats for this column
-                    if let Some(stats) = series.clone().cast(&DataType::Float64)?.f64()?.mean() {
-                        // Volume is typically much larger than price and often close to integers
-                        if financial_columns.volume.is_none()
-                            && (stats > 1000.0
-                                || series.dtype() == &DataType::Int64
-                                || series.dtype() == &DataType::UInt64)
-                        {
-                            financial_columns.volume = Some(name.clone());
-                            continue;
+        if let Some(series) = df.select_at_idx(i) {
+            if series.dtype().is_primitive_numeric() {
+                if let Ok(f64_series) = series.cast(&DataType::Float64) {
+                    if let Ok(nums) = f64_series.f64() {
+                        // Check if the column contains mostly large integers
+                        let is_volume =
+                            if let (Some(mean), Some(std_dev)) = (nums.mean(), nums.std(0)) {
+                                // Volume typically has:
+                                // 1. Much larger values than prices
+                                // 2. Higher variance
+                                // 3. Often contains round numbers
+                                let other_cols_mean = get_numeric_columns_mean(df, i)?;
+                                mean > other_cols_mean * 100.0 && std_dev > mean * 0.1
+                            } else {
+                                false
+                            };
+
+                        if is_volume {
+                            col_names[i] = "volume".to_string();
+                            financial_columns.volume = Some("volume".to_string());
+                            identified_cols[i] = true;
+                            break; // Only identify one volume column
                         }
                     }
                 }
             }
         }
-
-        // Now identify remaining columns if we have at least 4 price columns
-        let price_cols: Vec<String> = col_names
-            .iter()
-            .filter(|&name| {
-                Some(name.clone()) != financial_columns.date
-                    && Some(name.clone()) != financial_columns.volume
-            })
-            .cloned()
-            .collect();
-
-        // Simple heuristic mapping
-        if price_cols.len() >= 4 {
-            financial_columns.open = Some(price_cols[0].clone());
-            financial_columns.high = Some(price_cols[1].clone());
-            financial_columns.low = Some(price_cols[2].clone());
-            financial_columns.close = Some(price_cols[3].clone());
-        }
-
-        // For typical 6-column format (date, open, high, low, close, volume)
-        if n_cols == 6 && financial_columns.date.is_some() && financial_columns.volume.is_none() {
-            // Last column is likely volume if not identified
-            financial_columns.volume = Some(col_names[5].clone());
-        }
-
-        // If we still haven't identified the price columns, try to use statistics
-        if financial_columns.high.is_none() || financial_columns.low.is_none() {
-            identify_price_columns_by_statistics(df, &mut financial_columns, &price_cols)?;
-        }
     }
 
-    Ok(financial_columns)
-}
+    // Third pass: identify OHLC columns based on their statistical properties
+    let mut price_stats: Vec<(usize, f64, f64, f64)> = Vec::new(); // (index, min, max, std_dev)
 
-/// Use statistical properties to identify high, low, open, close columns
-fn identify_price_columns_by_statistics(
-    df: &DataFrame,
-    financial_columns: &mut FinancialColumns,
-    price_cols: &[String],
-) -> PolarsResult<()> {
-    // Track min and max values by column
-    let mut col_stats: HashMap<String, (f64, f64)> = HashMap::new(); // (min, max)
+    for (i, &identified) in identified_cols.iter().enumerate().take(n_cols) {
+        if identified {
+            continue;
+        }
 
-    for col_name in price_cols {
-        if let Ok(series) = df.column(col_name) {
+        if let Some(series) = df.select_at_idx(i) {
             if series.dtype().is_primitive_numeric() {
-                let f64_series = series.clone().cast(&DataType::Float64)?;
-
-                // Use proper Series methods with f64() to get ChunkedArray<Float64Type>
-                if let Ok(f64_chunked) = f64_series.f64() {
-                    let min_val = f64_chunked.min();
-                    let max_val = f64_chunked.max();
-
-                    if let (Some(min), Some(max)) = (min_val, max_val) {
-                        col_stats.insert(col_name.clone(), (min, max));
+                if let Ok(f64_series) = series.cast(&DataType::Float64) {
+                    if let Ok(nums) = f64_series.f64() {
+                        if let (Some(min), Some(max), Some(std)) =
+                            (nums.min(), nums.max(), nums.std(0))
+                        {
+                            price_stats.push((i, min, max, std));
+                        }
                     }
                 }
             }
         }
     }
 
-    // Find column with highest max values (likely high)
-    let mut high_col = None;
-    let mut high_val = f64::MIN;
-    for (col, (_, max)) in &col_stats {
-        if *max > high_val {
-            high_val = *max;
-            high_col = Some(col.clone());
+    // Sort by max values and standard deviation to identify columns
+    price_stats.sort_by(|a, b| {
+        let a_range = a.2 - a.1;
+        let b_range = b.2 - b.1;
+        b_range
+            .partial_cmp(&a_range)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then_with(|| b.3.partial_cmp(&a.3).unwrap_or(std::cmp::Ordering::Equal))
+    });
+
+    // Assign OHLC names based on statistical properties
+    for (idx, stat) in price_stats.iter().enumerate() {
+        let i = stat.0;
+        if !identified_cols[i] {
+            let col_name = match idx {
+                0 => {
+                    financial_columns.high = Some("high".to_string());
+                    "high"
+                }
+                1 => {
+                    financial_columns.low = Some("low".to_string());
+                    "low"
+                }
+                2 => {
+                    financial_columns.close = Some("close".to_string());
+                    "close"
+                }
+                3 => {
+                    financial_columns.open = Some("open".to_string());
+                    "open"
+                }
+                _ => "unknown",
+            };
+            col_names[i] = col_name.to_string();
+            identified_cols[i] = true;
         }
     }
 
-    // Find column with lowest min values (likely low)
-    let mut low_col = None;
-    let mut low_val = f64::MAX;
-    for (col, (min, _)) in &col_stats {
-        if *min < low_val {
-            low_val = *min;
-            low_col = Some(col.clone());
+    // Fill in any remaining unidentified columns
+    for (i, name) in col_names.iter_mut().enumerate().take(n_cols) {
+        if name.is_empty() {
+            *name = format!("unknown_{}", i);
         }
     }
 
-    // Assign remaining columns to open and close if they haven't been assigned
-    if price_cols.len() >= 4 {
-        let remaining_cols: Vec<String> = price_cols
-            .iter()
-            .filter(|&col| Some(col.clone()) != high_col && Some(col.clone()) != low_col)
-            .cloned()
-            .collect();
+    // Rename the columns
+    df.set_column_names(&col_names)?;
 
-        if remaining_cols.len() >= 2 {
-            if financial_columns.open.is_none() {
-                financial_columns.open = Some(remaining_cols[0].clone());
+    Ok(financial_columns)
+}
+
+/// Helper function to calculate mean of numeric columns excluding the specified column
+fn get_numeric_columns_mean(df: &DataFrame, exclude_idx: usize) -> PolarsResult<f64> {
+    let mut sum = 0.0;
+    let mut count = 0;
+
+    for i in 0..df.width() {
+        if i == exclude_idx {
+            continue;
+        }
+
+        if let Some(series) = df.select_at_idx(i) {
+            if series.dtype().is_primitive_numeric() {
+                if let Ok(f64_series) = series.cast(&DataType::Float64) {
+                    if let Ok(nums) = f64_series.f64() {
+                        if let Some(mean) = nums.mean() {
+                            sum += mean;
+                            count += 1;
+                        }
+                    }
+                }
             }
-            if financial_columns.close.is_none() {
-                financial_columns.close = Some(remaining_cols[1].clone());
-            }
         }
     }
 
-    // Set high and low if they were identified and not already set
-    if financial_columns.high.is_none() && high_col.is_some() {
-        financial_columns.high = high_col;
+    if count > 0 {
+        Ok(sum / count as f64)
+    } else {
+        Ok(0.0)
     }
-    if financial_columns.low.is_none() && low_col.is_some() {
-        financial_columns.low = low_col;
-    }
-
-    Ok(())
 }

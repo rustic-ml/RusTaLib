@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("---------------------------------------------------");
 
     // Read CSV file with financial data column mapping
-    let (df4, columns) = read_financial_data(csv_with_headers, true, "csv", ',')?;
+    let (df4, columns) = read_financial_data(csv_with_headers)?;
 
     println!("Financial data from CSV - Shape: {:?}", df4.shape());
     println!("\nIdentified financial columns:");
@@ -65,7 +65,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("---------------------------------------");
 
     // Read Parquet file with financial data column mapping
-    let (df5, columns) = read_financial_data(parquet_with_headers, true, "parquet", ',')?;
+    let (df5, columns) = read_financial_data(parquet_with_headers)?;
 
     println!("Financial data from Parquet - Shape: {:?}", df5.shape());
     println!("\nIdentified financial columns:");
@@ -123,7 +123,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("(Simulating a file without headers by setting has_header=false)");
 
     // Read CSV file pretending it has no headers
-    let (df6, columns) = read_financial_data(csv_with_headers, false, "csv", ',')?;
+    let (df6, columns) = read_financial_data(csv_with_headers)?;
 
     println!(
         "Financial data from CSV (no headers) - Shape: {:?}",
