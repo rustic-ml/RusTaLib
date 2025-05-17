@@ -99,6 +99,17 @@ pub fn read_parquet<P: AsRef<Path>>(file_path: P) -> PolarsResult<DataFrame> {
 /// whether or not the file has headers. It handles various common column name variations and
 /// automatically maps them to standardized names.
 ///
+/// # Column Name Handling
+///
+/// - **Case-insensitive**: Column names are handled in a case-insensitive manner (DATE, Date, date all match)
+/// - **Abbreviations**: Common abbreviations are supported:
+///   - Date: "date", "dt", "time", "datetime", "timestamp"
+///   - Open: "open", "o", "opening"
+///   - High: "high", "h", "highest"
+///   - Low: "low", "l", "lowest"
+///   - Close: "close", "c", "closing"
+///   - Volume: "volume", "vol", "v"
+///
 /// # Arguments
 ///
 /// * `file_path` - Path to the file (must have .csv or .parquet extension)
