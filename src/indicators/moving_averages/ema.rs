@@ -24,10 +24,13 @@ pub fn calculate_ema(df: &DataFrame, column: &str, window: usize) -> PolarsResul
 
     // Initialize with SMA for first window points
     let mut sma_sum = 0.0;
+    let mut valid_sma_count = 0;
     for i in 0..window {
         let val = series_ca.get(i).unwrap_or(0.0);
-        sma_sum += val;
-
+        if !val.is_nan() {
+            sma_sum += val;
+            valid_sma_count += 1;
+        }
         // Fill with nulls until we have enough data
         if i < window - 1 {
             ema_values.push(f64::NAN);
@@ -35,13 +38,21 @@ pub fn calculate_ema(df: &DataFrame, column: &str, window: usize) -> PolarsResul
     }
 
     // Add the initial SMA value
-    let initial_ema = sma_sum / window as f64;
+    let initial_ema = if valid_sma_count > 0 {
+        sma_sum / valid_sma_count as f64
+    } else {
+        f64::NAN
+    };
     ema_values.push(initial_ema);
 
     // Calculate EMA using the recursive formula
     let mut prev_ema = initial_ema;
     for i in window..series.len() {
         let price = series_ca.get(i).unwrap_or(0.0);
+        if price.is_nan() {
+            ema_values.push(f64::NAN);
+            continue;
+        }
         let ema = alpha * price + (1.0 - alpha) * prev_ema;
         ema_values.push(ema);
         prev_ema = ema;

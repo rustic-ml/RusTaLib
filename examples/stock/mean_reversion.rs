@@ -299,7 +299,7 @@ fn calculate_z_score(df: &mut DataFrame, window: usize) -> Result<(), PolarsErro
             z_scores.push(f64::NAN);
         } else {
             let window_slice = close.slice((i - window) as i64, window);
-            let window_vec: Vec<f64> = window_slice.iter().filter_map(|x| x).collect();
+            let window_vec: Vec<f64> = window_slice.iter().flatten().collect();
 
             if window_vec.is_empty() {
                 z_scores.push(f64::NAN);

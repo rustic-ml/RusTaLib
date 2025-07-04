@@ -41,6 +41,7 @@ rand = "0.9.1"
 [dev-dependencies]
 approx = "0.5.1"
 tempfile = "3.10.1"
+ta-lib-in-rust = "1.0.8"
 
 # General examples
 [[example]]
@@ -93,3 +94,12 @@ path = "examples/working_with_multi_stock_data.rs"
 [[example]]
 name = "file_reading_example"
 path = "examples/file_reading_example.rs"
+
+[[example]]
+name = "trend_adx_basic"
+path = "examples/trend_adx_basic.rs"
+
+[lib]
+name = "rustalib"
+path = "src/lib.rs"
+doctest = false

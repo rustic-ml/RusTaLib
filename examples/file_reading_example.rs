@@ -1,4 +1,4 @@
-use polars::prelude::*;
+// No direct Polars types used in this example; utilities handle DataFrame creation.
 use rustalib::util::file_utils::{read_csv, read_csv_default, read_financial_data, read_parquet};
 use std::error::Error;
 
