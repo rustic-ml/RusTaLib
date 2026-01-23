@@ -34,7 +34,7 @@ exclude = [
 polars = { version = "0.47.1", features = ["lazy", "strings", "temporal", "rolling_window", "parquet", "dtype-categorical", "dtype-struct"] }
 chrono = "0.4.34"
 thiserror = "2.0.11" # Consider updating if needed, check compatibility
-ndarray = "0.16.1" # Consider updating if needed, check compatibility
+ndarray = "0.17.2" # Consider updating if needed, check compatibility
 serde = { version = "1.0", features = ["derive"] }
 rand = "0.9.1"
 
