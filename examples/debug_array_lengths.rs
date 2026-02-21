@@ -127,10 +127,10 @@ fn main() -> Result<(), PolarsError> {
     println!("  closes_series: {}", closes_series.len());
 
     // Create DataFrame
-    let mut df = DataFrame::new(vec![
-        dates_series.clone().into(),
-        closes_series.clone().into(),
-    ])?;
+    let mut df = DataFrame::new(
+        dates_series.len(),
+        vec![dates_series.clone().into(), closes_series.clone().into()],
+    )?;
 
     println!("\nDataFrame height: {}", df.height());
 
@@ -144,7 +144,7 @@ fn main() -> Result<(), PolarsError> {
     println!("DataFrame height: {}", df.height());
 
     // Try to add the test vector to the DataFrame
-    let test_series = Series::new("test".into(), test_vec);
+    let test_series = Column::new("test".into(), test_vec);
     match df.with_column(test_series) {
         Ok(new_df) => {
             println!("Success! New DataFrame height: {}", new_df.height());

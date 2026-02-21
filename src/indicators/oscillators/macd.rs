@@ -32,7 +32,7 @@ pub fn calculate_macd(
 
     // Create a temporary DataFrame with MACD series for calculating the signal
     let macd_series = macd.clone();
-    let temp_df = DataFrame::new(vec![macd_series.with_name(column.into()).into()])?;
+    let temp_df = DataFrame::new(macd_series.len(), vec![macd_series.with_name(column.into()).into()])?;
 
     // Calculate the signal line as an EMA of the MACD
     let signal = calculate_ema(&temp_df, column, signal_period)?;

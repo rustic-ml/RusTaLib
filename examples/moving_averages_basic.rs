@@ -13,7 +13,7 @@ fn main() -> Result<(), PolarsError> {
     );
 
     // Create DataFrame with price data
-    let df = DataFrame::new(vec![close_prices.clone().into()])?;
+    let df = DataFrame::new(close_prices.len(), vec![close_prices.clone().into()])?;
 
     // Calculate different moving averages
     let sma_10 = calculate_sma(&df, "close", 10)?;

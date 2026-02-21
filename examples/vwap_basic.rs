@@ -72,14 +72,17 @@ fn main() -> Result<(), PolarsError> {
     );
 
     // Create DataFrame
-    let df = DataFrame::new(vec![
-        dates.clone().into(),
-        opens.clone().into(),
-        highs.clone().into(),
-        lows.clone().into(),
-        closes.clone().into(),
-        volumes.clone().into(),
-    ])?;
+    let df = DataFrame::new(
+        dates.len(),
+        vec![
+            dates.clone().into(),
+            opens.clone().into(),
+            highs.clone().into(),
+            lows.clone().into(),
+            closes.clone().into(),
+            volumes.clone().into(),
+        ],
+    )?;
 
     // Display the original data
     println!("Original OHLCV Data:");

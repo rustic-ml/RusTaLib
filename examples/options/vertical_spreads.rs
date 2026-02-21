@@ -54,7 +54,7 @@ fn main() -> Result<(), PolarsError> {
     let description = Series::new("description".into(), description_vec);
 
     // Create a DataFrame with our spread data
-    let mut df = DataFrame::new(vec![
+    let mut df = DataFrame::new(short_strike.len(), vec![
         short_strike.into(),
         long_strike.into(),
         short_price.into(),
@@ -123,11 +123,11 @@ fn main() -> Result<(), PolarsError> {
     }
 
     // Add calculated metrics to the dataframe
-    df.with_column(Series::new("max_profit".into(), max_profit))?;
-    df.with_column(Series::new("max_loss".into(), max_loss))?;
-    df.with_column(Series::new("breakeven".into(), breakeven))?;
-    df.with_column(Series::new("risk_reward".into(), risk_reward))?;
-    df.with_column(Series::new("strike_width".into(), strike_width))?;
+    df.with_column(Column::new("max_profit".into(), max_profit))?;
+    df.with_column(Column::new("max_loss".into(), max_loss))?;
+    df.with_column(Column::new("breakeven".into(), breakeven))?;
+    df.with_column(Column::new("risk_reward".into(), risk_reward))?;
+    df.with_column(Column::new("strike_width".into(), strike_width))?;
 
     // Display the results
     println!("Vertical Spread Metrics:");

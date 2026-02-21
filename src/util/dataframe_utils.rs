@@ -35,7 +35,7 @@ pub fn ensure_f64_column(df: &mut DataFrame, column_name: &str) -> PolarsResult<
 
     // 3) Convert the Column back into a Series and replace it in the DataFrame
     let series: Series = col.take_materialized_series();
-    df.replace(column_name, series)?;
+    df.replace(column_name, series.into_column())?;
 
     Ok(())
 }

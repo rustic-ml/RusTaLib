@@ -54,7 +54,7 @@ pub fn add_trend_indicators(df: &DataFrame) -> PolarsResult<DataFrame> {
 
     // Parabolic SAR
     let psar = calculate_psar(df, 0.02, 0.2)?;
-    result_df.with_column(psar)?;
+    result_df.with_column(psar.into_column())?;
 
     Ok(result_df)
 }

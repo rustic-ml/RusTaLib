@@ -17,7 +17,7 @@ fn main() -> Result<(), PolarsError> {
     );
 
     // Create DataFrame with price data
-    let df = DataFrame::new(vec![close_prices.clone().into()])?;
+    let df = DataFrame::new(close_prices.len(), vec![close_prices.clone().into()])?;
 
     println!("Basic Technical Indicators Example\n");
 

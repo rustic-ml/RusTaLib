@@ -10,5 +10,5 @@ pub fn recognize_patterns(_df: &DataFrame) -> PolarsResult<DataFrame> {
     // TODO: Implement candlestick pattern recognition
 
     // Return an empty DataFrame for now
-    DataFrame::new(Vec::new())
+    DataFrame::new(0, Vec::new())
 }

@@ -163,14 +163,17 @@ fn main() -> Result<(), PolarsError> {
     println!("  Volume count: {}", volumes.len());
 
     // Create DataFrame
-    let mut df = DataFrame::new(vec![
-        dates.into(),
-        opens.into(),
-        highs.into(),
-        lows.into(),
-        closes.clone().into(),
-        volumes.into(),
-    ])?;
+    let mut df = DataFrame::new(
+        dates.len(),
+        vec![
+            dates.into(),
+            opens.into(),
+            highs.into(),
+            lows.into(),
+            closes.clone().into(),
+            volumes.into(),
+        ],
+    )?;
 
     // Calculate indicators for trend following
     // 1. Calculate short and long SMAs
@@ -182,15 +185,15 @@ fn main() -> Result<(), PolarsError> {
     let sma_50_values = sma_50.f64()?.to_vec();
 
     // Add to dataframe
-    df.with_column(Series::new("sma_20".into(), sma_20_values))?;
-    df.with_column(Series::new("sma_50".into(), sma_50_values))?;
+    df.with_column(Column::new("sma_20".into(), sma_20_values))?;
+    df.with_column(Column::new("sma_50".into(), sma_50_values))?;
 
     // 2. Calculate MACD
     let (macd_line, signal_line) = calculate_macd(&df, 12, 26, 9, "close")?;
 
     // Add MACD and signal line to the dataframe
-    df.with_column(macd_line.with_name("macd".into()))?;
-    df.with_column(signal_line.with_name("macd_signal".into()))?;
+    df.with_column(macd_line.with_name("macd".into()).into_column())?;
+    df.with_column(signal_line.with_name("macd_signal".into()).into_column())?;
 
     // Calculate MACD histogram
     // First get the values as f64 arrays
@@ -206,7 +209,7 @@ fn main() -> Result<(), PolarsError> {
     }
 
     // Add the histogram to the dataframe
-    df.with_column(Series::new("macd_histogram".into(), histogram))?;
+    df.with_column(Column::new("macd_histogram".into(), histogram))?;
 
     // 3. Calculate ADX (Average Directional Index) for trend strength
     let adx = calculate_adx(&df, 14)?;
@@ -226,10 +229,10 @@ fn main() -> Result<(), PolarsError> {
             padded_adx.push(val);
         }
 
-        df.with_column(Series::new("adx".into(), padded_adx))?;
+        df.with_column(Column::new("adx".into(), padded_adx))?;
     } else {
         let adx_values = adx.f64()?.to_vec();
-        df.with_column(Series::new("adx".into(), adx_values))?;
+        df.with_column(Column::new("adx".into(), adx_values))?;
     }
 
     // 4. Calculate RSI
@@ -250,10 +253,10 @@ fn main() -> Result<(), PolarsError> {
             padded_rsi.push(val);
         }
 
-        df.with_column(Series::new("rsi".into(), padded_rsi))?;
+        df.with_column(Column::new("rsi".into(), padded_rsi))?;
     } else {
         let rsi_values = rsi.f64()?.to_vec();
-        df.with_column(Series::new("rsi".into(), rsi_values))?;
+        df.with_column(Column::new("rsi".into(), rsi_values))?;
     }
 
     // 5. Generate trend signals
@@ -359,7 +362,7 @@ fn calculate_trend_signals(df: &mut DataFrame) -> Result<(), PolarsError> {
     }
 
     // Add signals to dataframe
-    df.with_column(Series::new("signal".into(), signals))?;
+    df.with_column(Column::new("signal".into(), signals))?;
 
     Ok(())
 }

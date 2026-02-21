@@ -45,12 +45,15 @@ pub fn create_test_ohlcv_df() -> DataFrame {
 
     // Create the DataFrame
 
-    DataFrame::new(vec![
-        Series::new("open".into(), open).into(),
-        Series::new("high".into(), high).into(),
-        Series::new("low".into(), low).into(),
-        Series::new("close".into(), close).into(),
-        Series::new("volume".into(), volume).into(),
-    ])
+    DataFrame::new(
+        open.len(),
+        vec![
+            Series::new("open".into(), open).into(),
+            Series::new("high".into(), high).into(),
+            Series::new("low".into(), low).into(),
+            Series::new("close".into(), close).into(),
+            Series::new("volume".into(), volume).into(),
+        ],
+    )
     .unwrap()
 }

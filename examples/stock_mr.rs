@@ -30,10 +30,13 @@ fn main() -> Result<(), PolarsError> {
     }
 
     // Create DataFrame
-    let mut df = DataFrame::new(vec![
-        Series::new("date".into(), dates).into(),
-        Series::new("close".into(), closes.clone()).into(),
-    ])?;
+    let mut df = DataFrame::new(
+        dates.len(),
+        vec![
+            Series::new("date".into(), dates).into(),
+            Series::new("close".into(), closes.clone()).into(),
+        ],
+    )?;
 
     println!("Price data created with {} days", df.height());
 
@@ -118,15 +121,15 @@ fn main() -> Result<(), PolarsError> {
     }
 
     // Add calculated columns to DataFrame
-    df.with_column(Series::new("sma".into(), sma_vals))?;
-    df.with_column(Series::new("upper_band".into(), upper_band))?;
-    df.with_column(Series::new("lower_band".into(), lower_band))?;
-    df.with_column(Series::new("rsi".into(), rsi_vals))?;
-    df.with_column(Series::new("z_score".into(), z_scores))?;
+    df.with_column(Column::new("sma".into(), sma_vals))?;
+    df.with_column(Column::new("upper_band".into(), upper_band))?;
+    df.with_column(Column::new("lower_band".into(), lower_band))?;
+    df.with_column(Column::new("rsi".into(), rsi_vals))?;
+    df.with_column(Column::new("z_score".into(), z_scores))?;
 
     // Clone signals before adding to DataFrame
     let signals_copy = signals.clone();
-    df.with_column(Series::new("signal".into(), signals))?;
+    df.with_column(Column::new("signal".into(), signals))?;
 
     // Print results
     println!("\nMean Reversion Analysis:");

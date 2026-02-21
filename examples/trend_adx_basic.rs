@@ -28,7 +28,7 @@ fn main() -> PolarsResult<()> {
         ],
     );
 
-    let df = DataFrame::new(vec![high.into(), low.into(), close.into()])?;
+    let df = DataFrame::new(high.len(), vec![high.into(), low.into(), close.into()])?;
 
     // Calculate 14-period ADX
     let adx = calculate_adx(&df, 14)?;

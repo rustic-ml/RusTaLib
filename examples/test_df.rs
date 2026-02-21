@@ -8,7 +8,7 @@ fn main() -> Result<(), PolarsError> {
     let s2 = Series::new("b".into(), &[4, 5, 6]);
 
     // Create DataFrame
-    let df = DataFrame::new(vec![s1.into(), s2.into()])?;
+    let df = DataFrame::new(3, vec![s1.into(), s2.into()])?;
 
     // Print the DataFrame
     println!("Test DataFrame");

@@ -17,7 +17,7 @@ pub fn calculate_hma(df: &DataFrame, column: &str, period: usize) -> PolarsResul
         .subtract(&wma_full)?;
 
     // Create a temporary dataframe with the raw_hma
-    let temp_df = DataFrame::new(vec![raw_hma.clone().into()])?;
+    let temp_df = DataFrame::new(1, vec![raw_hma.clone().into()])?;
 
     // Calculate WMA of the result with period = sqrt(n)
     let sqrt_period = (period as f64).sqrt().round() as usize;

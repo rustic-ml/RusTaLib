@@ -48,15 +48,15 @@ pub fn add_volume_indicators(df: &DataFrame) -> PolarsResult<DataFrame> {
 
     // Calculate On Balance Volume (OBV)
     let obv = calculate_obv(df)?;
-    result_df.with_column(obv)?;
+    result_df.with_column(obv.into_column())?;
 
     // Calculate Chaikin Money Flow (CMF) with default period of 20
     let cmf = calculate_cmf(df, 20)?;
-    result_df.with_column(cmf)?;
+    result_df.with_column(cmf.into_column())?;
 
     // Calculate Money Flow Index (MFI) with default period of 14
     let mfi = calculate_mfi(df, 14)?;
-    result_df.with_column(mfi)?;
+    result_df.with_column(mfi.into_column())?;
 
     Ok(result_df)
 }

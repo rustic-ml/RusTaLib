@@ -13,7 +13,7 @@ fn main() -> Result<(), PolarsError> {
     );
 
     // Create DataFrame with price data
-    let df = DataFrame::new(vec![close_prices.clone().into()])?;
+    let df = DataFrame::new(close_prices.len(), vec![close_prices.clone().into()])?;
 
     // Calculate MACD with standard parameters
     // fast_period = 12, slow_period = 26, signal_period = 9

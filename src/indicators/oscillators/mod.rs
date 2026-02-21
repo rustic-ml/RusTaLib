@@ -51,21 +51,21 @@ pub fn add_oscillator_indicators(df: &DataFrame) -> PolarsResult<DataFrame> {
 
     // RSI
     let rsi_14 = calculate_rsi(df, 14, "close")?;
-    result_df.with_column(rsi_14)?;
+    result_df.with_column(rsi_14.into_column())?;
 
     // MACD
     let (macd, macd_signal) = calculate_macd(df, 12, 26, 9, "close")?;
-    result_df.with_column(macd)?;
-    result_df.with_column(macd_signal)?;
+    result_df.with_column(macd.into_column())?;
+    result_df.with_column(macd_signal.into_column())?;
 
     // Williams %R
     let williams_r_14 = calculate_williams_r(df, 14)?;
-    result_df.with_column(williams_r_14)?;
+    result_df.with_column(williams_r_14.into_column())?;
 
     // Stochastic Oscillator
     let (stoch_k, stoch_d) = calculate_stochastic(df, 14, 3, 3)?;
-    result_df.with_column(stoch_k)?;
-    result_df.with_column(stoch_d)?;
+    result_df.with_column(stoch_k.into_column())?;
+    result_df.with_column(stoch_d.into_column())?;
 
     Ok(result_df)
 }

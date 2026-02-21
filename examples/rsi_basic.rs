@@ -12,7 +12,7 @@ fn main() -> Result<(), PolarsError> {
     );
 
     // Create DataFrame with date and price data
-    let df = DataFrame::new(vec![close_prices.clone().into()])?;
+    let df = DataFrame::new(close_prices.len(), vec![close_prices.clone().into()])?;
 
     // Calculate RSI with 5-period setting for this short example
     let rsi = calculate_rsi(&df, 5, "close")?;

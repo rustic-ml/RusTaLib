@@ -146,7 +146,7 @@ pub fn add_technical_indicators(df: &mut DataFrame) -> PolarsResult<DataFrame> {
     features_to_add.extend(time_features);
 
     for feature in features_to_add {
-        df.with_column(feature)?;
+        df.with_column(feature.into_column())?;
     }
 
     Ok(df.clone())

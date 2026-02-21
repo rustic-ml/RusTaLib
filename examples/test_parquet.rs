@@ -7,7 +7,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("====================================================\n");
 
     // Create a sample DataFrame with financial data with abbreviated and varied-case headers
-    let df = DataFrame::new(vec![
+    let df = DataFrame::new(3, vec![
         Series::new("dt".into(), &["2024-01-01", "2024-01-02", "2024-01-03"]).into(),
         Series::new("o".into(), &[150.0, 152.0, 151.0]).into(), // abbreviated "open"
         Series::new("h".into(), &[155.0, 156.0, 154.0]).into(), // abbreviated "high"

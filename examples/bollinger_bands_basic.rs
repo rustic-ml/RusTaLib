@@ -13,7 +13,7 @@ fn main() -> Result<(), PolarsError> {
     );
 
     // Create DataFrame with price data
-    let df = DataFrame::new(vec![close_prices.clone().into()])?;
+    let df = DataFrame::new(close_prices.len(), vec![close_prices.clone().into()])?;
 
     // Calculate Bollinger Bands with standard parameters (20-period, 2 standard deviations)
     let (middle, upper, lower) = calculate_bollinger_bands(&df, 20, 2.0, "close")?;

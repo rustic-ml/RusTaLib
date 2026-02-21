@@ -163,14 +163,17 @@ fn main() -> Result<(), PolarsError> {
     println!("  Volume count: {}", volumes.len());
 
     // Create DataFrame
-    let mut df = DataFrame::new(vec![
-        dates.into(),
-        opens.into(),
-        highs.into(),
-        lows.into(),
-        closes.clone().into(),
-        volumes.into(),
-    ])?;
+    let mut df = DataFrame::new(
+        opens.len(),
+        vec![
+            dates.into(),
+            opens.into(),
+            highs.into(),
+            lows.into(),
+            closes.clone().into(),
+            volumes.into(),
+        ],
+    )?;
 
     // Calculate indicators
     // 1. Calculate SMA
@@ -180,15 +183,15 @@ fn main() -> Result<(), PolarsError> {
         sma_20.len(),
         df.height()
     );
-    df.with_column(sma_20)?;
+    df.with_column(sma_20.into_column())?;
 
     // 2. Calculate Bollinger Bands
     let (middle, upper, lower) = calculate_bollinger_bands(&df, 20, 2.0, "close")?;
-    println!("Middle Band length: {}, Upper Band length: {}, Lower Band length: {}, DataFrame height: {}", 
+    println!("Middle Band length: {}, Upper Band length: {}, Lower Band length: {}, DataFrame height: {}",
              middle.len(), upper.len(), lower.len(), df.height());
-    df.with_column(middle)?;
-    df.with_column(upper)?;
-    df.with_column(lower)?;
+    df.with_column(middle.into_column())?;
+    df.with_column(upper.into_column())?;
+    df.with_column(lower.into_column())?;
 
     // 3. Calculate RSI
     let rsi = calculate_rsi(&df, 14, "close")?;
@@ -223,12 +226,12 @@ fn main() -> Result<(), PolarsError> {
             padded_rsi.len(),
             df.height()
         );
-        df.with_column(padded_rsi)?;
+        df.with_column(padded_rsi.into_column())?;
     } else {
         // Rename RSI column to ensure consistency
         let rsi_values = rsi.f64()?.to_vec();
         let renamed_rsi = Series::new("rsi".into(), rsi_values);
-        df.with_column(renamed_rsi)?;
+        df.with_column(renamed_rsi.into_column())?;
     }
 
     // 4. Calculate Z-Score (a simpler measure of mean reversion)
@@ -343,7 +346,7 @@ fn calculate_z_score(df: &mut DataFrame, window: usize) -> Result<(), PolarsErro
         z_scores.len(),
         height
     );
-    df.with_column(Series::new("z_score".into(), z_scores))?;
+    df.with_column(Column::new("z_score".into(), z_scores))?;
 
     Ok(())
 }
@@ -384,7 +387,7 @@ fn calculate_mean_reversion_signals(df: &mut DataFrame) -> Result<(), PolarsErro
     );
 
     // Add signals to dataframe
-    df.with_column(Series::new("signal".into(), signals))?;
+    df.with_column(Column::new("signal".into(), signals))?;
 
     Ok(())
 }

@@ -212,7 +212,7 @@ fn main() -> Result<(), PolarsError> {
         let add_column_safely = |df: &mut DataFrame, series: Series| -> Result<(), PolarsError> {
             // Only add the column if it has the same length as the DataFrame
             if series.len() == df.height() {
-                df.with_column(series)?;
+                df.with_column(series.into_column())?;
             }
             Ok(())
         };

@@ -7,7 +7,7 @@ fn main() -> Result<(), PolarsError> {
     let values = Series::new("value".into(), &[10.0, 11.0, 12.0]);
 
     // Create DataFrame
-    let df = DataFrame::new(vec![dates.clone().into(), values.clone().into()])?;
+    let df = DataFrame::new(3, vec![dates.clone().into(), values.clone().into()])?;
 
     // Print information
     println!(

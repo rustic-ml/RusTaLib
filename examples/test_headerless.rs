@@ -28,14 +28,17 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Create DataFrame
-    let mut df = DataFrame::new(vec![
-        dates.into(),
-        opens.into(),
-        highs.into(),
-        lows.into(),
-        closes.into(),
-        volumes.into(),
-    ])?;
+    let mut df = DataFrame::new(
+        5,
+        vec![
+            dates.into(),
+            opens.into(),
+            highs.into(),
+            lows.into(),
+            closes.into(),
+            volumes.into(),
+        ],
+    )?;
 
     println!("Original DataFrame with generic column names:");
     println!("{}\n", df);

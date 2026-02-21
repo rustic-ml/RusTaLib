@@ -128,7 +128,7 @@ pub fn calculate_keltner_channels(
     let upper_series = Series::new("keltner_upper".into(), upper_band);
     let lower_series = Series::new("keltner_lower".into(), lower_band);
 
-    DataFrame::new(vec![
+    DataFrame::new(upper_series.len(), vec![
         upper_series.into(),
         middle_series.into(),
         lower_series.into(),

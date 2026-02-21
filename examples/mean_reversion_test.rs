@@ -21,7 +21,10 @@ fn main() -> Result<(), PolarsError> {
     let values = Series::new("value".into(), &[10.0, 11.0, 12.0, 13.0, 14.0]);
 
     // Create DataFrame
-    let mut df = DataFrame::new(vec![dates.clone().into(), values.clone().into()])?;
+    let mut df = DataFrame::new(
+        values.len(),
+        vec![dates.clone().into(), values.clone().into()],
+    )?;
 
     // Print information
     println!("Original DataFrame:");
@@ -45,7 +48,7 @@ fn main() -> Result<(), PolarsError> {
     let doubles_series = Series::new("doubles".into(), doubles);
 
     // Add the new column
-    df.with_column(doubles_series)?;
+    df.with_column(doubles_series.into_column())?;
     println!("\nDataFrame with new column:");
     println!("{}", df);
 
