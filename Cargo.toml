@@ -31,12 +31,12 @@ exclude = [
 ]
 
 [dependencies]
-polars = { git = "https://github.com/pola-rs/polars.git", rev = "d4547c2d464f1a4a0037c767f4c981d50844ffb9", features = ["lazy", "strings", "temporal", "rolling_window", "parquet", "dtype-categorical", "dtype-struct", "timezones", "regex"] }
+polars = { version = "0.54.4", features = ["lazy", "strings", "temporal", "rolling_window", "parquet", "dtype-categorical", "dtype-struct", "timezones", "regex"] }
 chrono = "0.4.42"
-thiserror = "2.0.11" # Consider updating if needed, check compatibility
-ndarray = "0.16.1" # Consider updating if needed, check compatibility
+thiserror = "2.0.18" # Consider updating if needed, check compatibility
+ndarray = "0.17.2" # Consider updating if needed, check compatibility
 serde = { version = "1.0", features = ["derive"] }
-rand = "0.9.1"
+rand = "0.10.1"
 
 [dev-dependencies]
 approx = "0.5.1"
